@@ -1,40 +1,24 @@
-from functools import wraps
-import parser
+
 import ast
 from ast import *
-from uuid import uuid4
-from time import time
+
 import astor
-from pprint import pprint
-import re
-import sys
-import os
-import subprocess
-#from PythonSwiftLink.build_files.pack_files import pack_all,remove_cache_file
-import configparser
 import json
-from os.path import join,exists
-import shutil
-import random
-import string
+
 import platform 
 from typing import List
 from pathlib import Path
-# from KivySwiftLink.def_types import types2dict
-
-# from KivySwiftLink.create_recipe import create_recipe, create_setup_py
-# from KivySwiftLink.typedef_generator import load_c_types
 
 OSX_VERSION = ".".join(platform.mac_ver()[0].split(".")[:-1])
 PY_VERSION = ".".join(platform.python_version_tuple()[:-1])
 
-class WrapClass2:
+class PyWrapClass:
 
     def __init__(self):
-        super(WrapClass2, self).__init__()
+        super(PyWrapClass, self).__init__()
 
     @staticmethod
-    def json_export(string:str) -> str:
+    def json_export(wrap_title: str, string:str) -> str:
         module = ast.parse(string.replace("List[","["))
         wrap_list = []
 
@@ -44,13 +28,13 @@ class WrapClass2:
                 pass
             
             if isinstance(class_body,ast.ClassDef):
-                wrap_class = WrapClass2()
+                wrap_class = PyWrapClass()
                 js = wrap_class.parse_code_json(class_body)
                 #wrap_class.parse_code(class_body)
                 #wrap_class.setup_callback_type()
                 wrap_list.append(js)
         wrap_module = {
-            "filename": "wraptest.py".split(".")[0],
+            "filename": wrap_title,
             "classes": wrap_list
         }
         return json.dumps(wrap_module)
@@ -64,17 +48,39 @@ class WrapClass2:
         functions = []
         self.export_dict = {
             "title": class_body.name,
-            "functions": functions
+            "functions": functions,
+            "decorators": []
         }
-
         self.calltitle = class_body.name
         
-        #_cdec = self.handle_class_decorators(class_body)
-        
+        self.handle_class_decorators(class_body)
         #self.gen_send_start_function(send_functions)
         self.handle_class_children(class_body.body)
 
         return self.export_dict
+
+    def handle_class_decorators(self,class_body: ast.ClassDef):
+        decorators = class_body.decorator_list
+        for dec in decorators:
+
+            if isinstance(dec,ast.Call):
+                id: ast.Name = dec.func.id
+            else:
+                id = dec.id
+
+        if id == "EventDispatcher":
+            if len(dec.args) != 0:
+                events: ast.List = dec.args[0]
+                _events_ = [event.value for event in events.elts]
+                d = {
+                    "type": "EventDispatch",
+                    "args": [json.dumps({
+                        "events": _events_
+                        })]
+                    
+                }
+                self.export_dict["decorators"].append(d)
+
 
     def handle_class_children(self,child):
         for cbody in child:
@@ -94,6 +100,19 @@ class WrapClass2:
             if t == "callback":
                 func_dict["is_callback"] = True
 
+            elif t == "swift_func":
+                func_dict["swift_func"] = True
+            
+            elif t == "call_target":
+                func_dict["call_target"] = decorator.args[0].value
+            
+            elif t == "call_class":
+                func_dict["call_class"] = decorator.args[0].value
+            
+            elif t == "call_object":
+                func_dict["call_object"] = decorator.args[0].id
+            
+            
 
     def handle_class_function(self, body: ast.FunctionDef):
         #print("function: ",body.name)
@@ -102,6 +121,8 @@ class WrapClass2:
         arg_list = []
         returns = body.returns
         
+
+
         if returns:
             _return_ = {
             "name": returns.id,
@@ -119,8 +140,9 @@ class WrapClass2:
         func = {
             "name": body.name,
             "args": arg_list,
+            "returns": _return_,
             "is_callback": False,
-            "returns": _return_
+            "swift_func": False,
         }
         self.handle_function_decorators(body,func)
         
@@ -156,6 +178,3 @@ class WrapClass2:
                     "idx": count
                 })
             count += 1
-            
-        #print()
-        
