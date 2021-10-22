@@ -1,4 +1,4 @@
-from ctypes import c_double, c_int, c_int16, c_long, c_longdouble, c_longlong, c_short, c_uint16, c_ulong, c_ulonglong
+from ctypes import c_double, c_float, c_int, c_int16, c_long, c_longdouble, c_longlong, c_short, c_uint16, c_ulong, c_ulonglong
 from ctypes import c_uint8
 from ctypes import c_uint8
 from ctypes import c_int8 
@@ -20,6 +20,7 @@ json = c_int8
 jsondata = c_uint8
 uint = c_uint
 double = c_double
+float32 = c_float
 longdouble = c_longdouble
 
 __all__ = [
@@ -34,6 +35,8 @@ __all__ = [
     "json",
     "jsondata",
     "uint",
+    "double",
+    "float32"
     ## other types
     "List",
     "Tuple",
