@@ -4,7 +4,8 @@ from ctypes import c_uint8
 from ctypes import c_int8 
 from ctypes import c_uint
 from ctypes import c_long
-from typing import List,Tuple
+from typing import List,Tuple,TypeVar
+from cython import struct
 #from ctypes import c_int8 as
 long = c_long
 ulong = c_ulong
@@ -36,8 +37,10 @@ __all__ = [
     "jsondata",
     "uint",
     "double",
-    "float32"
+    "float32",
     ## other types
+    "TypeVar",
+    "struct",
     "List",
     "Tuple",
     "callback",

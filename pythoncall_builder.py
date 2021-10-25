@@ -8,6 +8,9 @@ import json
 import platform 
 from typing import List
 from pathlib import Path
+from cython import struct
+
+
 
 OSX_VERSION = ".".join(platform.mac_ver()[0].split(".")[:-1])
 PY_VERSION = ".".join(platform.python_version_tuple()[:-1])
@@ -19,24 +22,46 @@ class PyWrapClass:
 
     @staticmethod
     def json_export(wrap_title: str, string:str) -> str:
-        module = ast.parse(string.replace("List[","["))
+        module = ast.parse(string)
         wrap_list = []
+        type_var_list = []
+        
+        for body in module.body:
+            #print("\n")
+            #print(body)
 
-        for class_body in module.body:
+
+            if isinstance(body,ast.Assign):
+                if isinstance(body.value, ast.Call):
+                    assign_t = body.value.func.id
+
+                    if assign_t == "struct":
+                        
+                        #print(f"struct {''}: {body.value}")
+                        type_var_list.append(json.dumps({
+                            "type:": "struct",
+                            "type_name": body.targets[0].id,
+                            "args": [{"key": key.arg, "type": key.value.id} for key in body.value.keywords]
+                        }))
             
-            if isinstance(class_body,ast.Assign):
-                pass
-            
-            if isinstance(class_body,ast.ClassDef):
+            if isinstance(body,ast.ClassDef):
                 wrap_class = PyWrapClass()
-                js = wrap_class.parse_code_json(class_body)
+                js = wrap_class.parse_code_json(body)
                 #wrap_class.parse_code(class_body)
                 #wrap_class.setup_callback_type()
                 wrap_list.append(js)
+            
+            #print("\n")
+        #print(type_var_list)
         wrap_module = {
             "filename": wrap_title,
-            "classes": wrap_list
+            "classes": wrap_list,
+            "typevars": type_var_list
         }
+
+       
+        # with open("./class_export.json", "w") as f:
+        #     json.dump(wrap_module, f)
         return json.dumps(wrap_module)
 
 
@@ -68,18 +93,18 @@ class PyWrapClass:
             else:
                 id = dec.id
 
-        if id == "EventDispatcher":
-            if len(dec.args) != 0:
-                events: ast.List = dec.args[0]
-                _events_ = [event.value for event in events.elts]
-                d = {
-                    "type": "EventDispatch",
-                    "args": [json.dumps({
-                        "events": _events_
-                        })]
-                    
-                }
-                self.export_dict["decorators"].append(d)
+            if id == "EventDispatcher":
+                if len(dec.args) != 0:
+                    events: ast.List = dec.args[0]
+                    _events_ = [event.value for event in events.elts]
+                    d = {
+                        "type": "EventDispatch",
+                        "args": [json.dumps({
+                            "events": _events_
+                            })]
+                        
+                    }
+                    self.export_dict["decorators"].append(d)
 
 
     def handle_class_children(self,child):
@@ -152,13 +177,28 @@ class PyWrapClass:
             #print("\t",arg.arg, arg.annotation.id)
             is_list = False
             is_data = False
-            if isinstance(arg.annotation, ast.List):
-                is_list = True
-                t = arg.annotation.elts[0].id
+            is_tuple = False
+            if isinstance(arg.annotation, ast.Subscript):
+                
+                _anno_ = arg.annotation
+                sub_id: str = _anno_.value.id
+                #print("\t",sub_id)
+                if sub_id == "list":
+                    is_list = True
+                    t = _anno_.slice.id
+                if sub_id == "tuple":
+                    is_tuple = True
+                    
+                    #print(_anno_.__dict__)
+                    t = sub_id
+                    #Exception()
+
             else:
                 t = arg.annotation.id
 
-            if t == "jsondata":
+ 
+
+            if t in ["jsondata", "data"]:
                 is_data = True
             arg_list.append(
                 {
