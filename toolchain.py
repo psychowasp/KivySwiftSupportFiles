@@ -1239,8 +1239,6 @@ def update_pbxproj(filename, pbx_frameworks=None, custom_recipes=None, custom_re
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
     group = project.get_or_create_group("Frameworks")
-    print("get_keys()",project.get_keys())
-    #return 
     g_classes = project.get_or_create_group("Classes")
     file_options = FileOptions(embed_framework=False, code_sign_on_copy=True)
     for framework in pbx_frameworks:
@@ -1254,8 +1252,6 @@ def update_pbxproj(filename, pbx_frameworks=None, custom_recipes=None, custom_re
                           "{}.framework".format(framework))
         # Quick Fix
         items = project.get_files_by_name(basename(f_path),None)
-        print(basename(f_path),items, len(items))
-        #print()
         if len(items) == 0:
         #     # Quick Fix end
             project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
@@ -1291,7 +1287,6 @@ def update_pbxproj(filename, pbx_frameworks=None, custom_recipes=None, custom_re
         logger.info("Ensure {} sources are used".format(name))
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
-
 
     project.backup()
     project.save()
