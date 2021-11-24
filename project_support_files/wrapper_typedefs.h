@@ -73,7 +73,6 @@ typedef struct PythonList_Double {
 	long size;
 } PythonList_Double;
 //list_float32
-//typedef const float * _Nonnull PythonList_Float;
 typedef struct PythonList_Float {
 	float const* _Nonnull ptr;
 	long size;
@@ -88,3 +87,16 @@ typedef struct PythonList_PythonString {
 	char const* _Nonnull const* _Nonnull ptr;
 	long size;
 } PythonList_PythonString;
+
+
+
+//list PythonJsonData
+typedef struct PythonList_PythonData { 
+	PythonData const* _Nonnull ptr;
+	long size;
+} PythonList_PythonData;
+//list_data
+typedef struct PythonList_PythonJsonData { 
+	PythonJsonData const* _Nonnull ptr;
+	long size;
+} PythonList_PythonJsonData;
