@@ -1,57 +1,90 @@
 //data
-typedef const unsigned char* PythonData;
-
+//typedef unsigned char const* PythonData;
+typedef struct PythonData {
+	unsigned char const* _Nonnull ptr;
+	long size;
+} PythonData;
 //str
-typedef const char* PythonString;
+typedef char const* _Nonnull PythonString;
 
 //bytes
-typedef const char* PythonBytes;
+typedef const char * _Nonnull PythonBytes;
 
 //object
-typedef const void* PythonObject;
+typedef const void * _Nonnull PythonObject;
 
 //json
-typedef const char* PythonJsonString;
+typedef char const* _Nonnull PythonJsonString;
 
 //jsondata
-typedef const unsigned char* PythonJsonData;
+//typedef unsigned char const* PythonJsonData;
+typedef struct PythonJsonData { 
+	unsigned char const* _Nonnull ptr;
+	long size;
+} PythonJsonData;
 
 //list_int
-typedef const long* PythonList_Int;
-
+typedef struct PythonList_Int {
+	long const* _Nonnull ptr;
+	long size;
+} PythonList_Int;
 //list_uint
-typedef const unsigned long* PythonList_UInt;
+typedef struct PythonList_UInt {
+	unsigned long const* _Nonnull ptr;
+	long size;
+} PythonList_UInt;
 
 //list_int32
-typedef const int* PythonList_Int32;
+typedef struct PythonList_Int32 {
+	int const* _Nonnull ptr;
+	long size;
+} PythonList_Int32;
 
 //list_uint32
-typedef const unsigned int* PythonList_UInt32;
-
+typedef struct PythonList_UInt32 {
+	unsigned int const* _Nonnull ptr;
+	long size;
+} PythonList_UInt32;
 //list_longlong
-typedef const long long* PythonList_Int64;
+//typedef const long long * _Nonnull PythonList_Int64;
 
 //list_ulonglong
-typedef const unsigned long long* PythonList_UInt64;
+//typedef const unsigned long long * _Nonnull PythonList_UInt64;
 
 //list_uint8
-typedef const unsigned char* PythonList_UInt8;
-
+//typedef const unsigned char * _Nonnull PythonList_UInt8;
+typedef struct PythonList_UInt8 {
+	unsigned char const* _Nonnull ptr;
+	long size;
+} PythonList_UInt8;
 //list_int16
-typedef const short* PythonList_Int16;
-
+typedef struct PythonList_Int16 {
+	short const* _Nonnull ptr;
+	long size;
+} PythonList_Int16;
 //list_uint16
-typedef const unsigned short* PythonList_UInt16;
-
+typedef struct PythonList_UInt16 {
+	unsigned short const* _Nonnull ptr;
+	long size;
+} PythonList_UInt16;
 //list_double
-typedef const double* PythonList_Double;
-
+typedef struct PythonList_Double {
+	double const* _Nonnull ptr;
+	long size;
+} PythonList_Double;
 //list_float32
-typedef const float* PythonList_Float;
-
+//typedef const float * _Nonnull PythonList_Float;
+typedef struct PythonList_Float {
+	float const* _Nonnull ptr;
+	long size;
+} PythonList_Float;
 //list_object
-typedef const const void** PythonList_PythonObject;
-
-//list_data
-typedef const const unsigned char** PythonList_PythonData;
-
+typedef struct PythonList_PythonObject {
+	void const* _Nonnull ptr;
+	long size;
+} PythonList_PythonObject;
+//list_string
+typedef struct PythonList_PythonString {
+	char const* _Nonnull const* _Nonnull ptr;
+	long size;
+} PythonList_PythonString;
