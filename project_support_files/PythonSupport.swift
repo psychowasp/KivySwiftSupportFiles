@@ -31,14 +31,14 @@ extension Data {
 //        }
 //    }
     
-    var asPythonData: PythonData {
+    var pythonData: PythonData {
         self.withUnsafeBytes { (unsafeBytes) in
             let bytes = unsafeBytes.bindMemory(to: UInt8.self).baseAddress!
             return PythonData(ptr: bytes, size: self.count)
         }
     }
     
-    var asPythonJsonData: PythonJsonData {
+    var pythonJsonData: PythonJsonData {
         self.withUnsafeBytes { (unsafeBytes) in
             let bytes = unsafeBytes.bindMemory(to: UInt8.self).baseAddress!
             return PythonJsonData(ptr: bytes, size: self.count)
@@ -62,13 +62,13 @@ extension Array {
 //Python/C Types
 
 extension String {
-    var asPythonString: PythonString {
+    var pythonString: PythonString {
         return "".cString(using: .utf8)!.unsafePointer()
     }
 }
 
 extension PythonString {
-    func asString() -> String {
+    var string: String {
         return String(cString: self )
     }
 }
@@ -77,9 +77,8 @@ extension PythonBytes {
 
 }
 
-
 extension PythonData {
-    var asData: Data {
+    var data: Data {
         return Data(UnsafeBufferPointer(start: self.ptr, count: self.size))
     }
 }
@@ -88,12 +87,12 @@ extension PythonData {
 
 extension PythonJsonData {
     
-    var asData: Data {
+    var data: Data {
         return Data(UnsafeBufferPointer(start: self.ptr, count: self.size))
     }
     
-    func asDictionary(options: JSONSerialization.ReadingOptions = .mutableContainers) -> [String:Any]! {
-        let data = self.asData
+    func dictionary(options: JSONSerialization.ReadingOptions = .mutableContainers) -> [String:Any]! {
+        let data = self.data
         do {
             let dict = try JSONSerialization.jsonObject(with: data, options: options) as! [String:Any]
             return dict
@@ -103,8 +102,8 @@ extension PythonJsonData {
         }
     }
     
-    func asArray(options: JSONSerialization.ReadingOptions = .mutableContainers) -> [Any]! {
-        let data = self.asData
+    func array(options: JSONSerialization.ReadingOptions = .mutableContainers) -> [Any]! {
+        let data = self.data
         do {
             let array = try JSONSerialization.jsonObject(with: data, options: options) as! [Any]
             return array
@@ -115,12 +114,22 @@ extension PythonJsonData {
     }
 }
 
+func pythonList_PythonString(strings: [PythonString]) -> PythonList_PythonString {
+    //let list_pystr = self.map{$0.pythonString}
+    let rtn = PythonList_PythonString(ptr: strings, size: strings.count)
+    return rtn
+}
+
+extension Array where Element == String {
+    
+}
+
 extension PythonList_PythonString {
     
     func asArray(length: CLong) -> [String] {
         var strings: [String] = []
         for i in 0..<length {
-            strings.append(self.ptr[i].asString())
+            strings.append(self.ptr[i].string)
         }
         return strings
     }
@@ -128,7 +137,7 @@ extension PythonList_PythonString {
 
 func pythonJSONBytes(object: Any) -> PythonData? {
     do {
-        let bytes = try JSONSerialization.data(withJSONObject: object, options: .fragmentsAllowed).asPythonData
+        let bytes = try JSONSerialization.data(withJSONObject: object, options: .fragmentsAllowed).pythonData
         return bytes
     } catch {
         print(error.localizedDescription)

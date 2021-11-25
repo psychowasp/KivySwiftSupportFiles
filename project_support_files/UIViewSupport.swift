@@ -8,8 +8,6 @@
 import Foundation
 import UIKit
 
-
-
 func get_viewcontroller() -> UIViewController? {
     let window = UIApplication.shared.windows.first
     if window == nil {
@@ -93,7 +91,6 @@ extension UIImage {
         return pixelData
     }
  }
-
 
 extension UIView {
     func pixelData() -> (bytes: [UInt8], size: Int)? {
