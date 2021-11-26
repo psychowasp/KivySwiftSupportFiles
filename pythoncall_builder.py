@@ -137,7 +137,72 @@ class PyWrapClass:
             elif t == "call_object":
                 func_dict["call_object"] = decorator.args[0].id
             
+       
+    def handle_arg_type(self, arg, count: int, returns: bool) -> dict:
+        #print("\t",arg.arg, arg.annotation.id)
+        is_list = False
+        is_data = False
+        is_tuple = False
+        # print("\nhandle_arg_type:")
+        # print("\treturn",returns,arg,arg.__dict__)
+        
+        #if returns:
+        
+        #if isinstance(arg, ast.arg):
+        #if isinstance(arg, ast.Name):
+        anno = None
+        if isinstance(arg, ast.arg):
+            anno = arg.annotation
+        else:
+            anno = arg
             
+        
+        if isinstance(anno, ast.Subscript):
+            
+            _anno_ = anno
+            sub_id: str = _anno_.value.id
+            #print("\t",sub_id)
+            if sub_id == "list":
+                is_list = True
+                t = _anno_.slice.id
+            if sub_id == "tuple":
+                is_tuple = True
+                
+                #print(_anno_.__dict__)
+                t = sub_id
+                #Exception()
+
+        
+        else:
+            # print("\tnot subscript")
+            if isinstance(arg, ast.Name):
+                t = arg.id
+            else:
+                t = arg.annotation.id
+
+
+        if t in ["jsondata", "data"]:
+            is_data = True
+        
+        if returns:
+            return {
+            "name": t,
+            "type": t,
+            "is_list": is_list,
+            "is_data": is_data,
+            "idx": 0,
+            "is_return": True
+        }
+        
+        return {
+            "name": arg.arg,
+            "type": t,
+            "is_list": is_list,
+            "is_data": is_data,
+            "idx": count
+        }
+
+    
 
     def handle_class_function(self, body: ast.FunctionDef):
         #print("function: ",body.name)
@@ -149,12 +214,7 @@ class PyWrapClass:
 
 
         if returns:
-            _return_ = {
-            "name": returns.id,
-            "type": returns.id,
-            "idx": 0,
-            "is_return": True
-        }
+            _return_ = self.handle_arg_type(returns, 0, True)
         else:
             _return_ = {
             "name": "void",
@@ -162,6 +222,7 @@ class PyWrapClass:
             "idx": 0,
             "is_return": True
         }
+        #print("\treturn_data:", _return_)
         func = {
             "name": body.name,
             "args": arg_list,
@@ -175,46 +236,7 @@ class PyWrapClass:
         count = 0
         for arg in func_args:
             #print("\t",arg.arg, arg.annotation.id)
-            is_list = False
-            is_data = False
-            is_tuple = False
-            if isinstance(arg.annotation, ast.Subscript):
-                
-                _anno_ = arg.annotation
-                sub_id: str = _anno_.value.id
-                #print("\t",sub_id)
-                if sub_id == "list":
-                    is_list = True
-                    t = _anno_.slice.id
-                if sub_id == "tuple":
-                    is_tuple = True
-                    
-                    #print(_anno_.__dict__)
-                    t = sub_id
-                    #Exception()
-
-            else:
-                t = arg.annotation.id
-
- 
-
-            if t in ["jsondata", "data"]:
-                is_data = True
-            arg_list.append(
-                {
-                    "name": arg.arg,
-                    "type": t,
-                    "is_list": is_list,
-                    "idx": count
-                }
-            )
-            if is_list or is_data:
-                count += 1
-                arg_list.append(
-                {
-                    "name": f"{arg.arg}_size",
-                    "type": "int",
-                    "is_counter": True,
-                    "idx": count
-                })
+            arg_data = self.handle_arg_type(arg,count,False)
+            #print("\t",arg_data)
+            arg_list.append(arg_data)
             count += 1
