@@ -4,15 +4,15 @@ import SwiftyJSON
 
 extension PythonData {
     func asJson(withLength length: Int) -> JSON! {
-        return try! JSON(data: self.asData)
+        return try! JSON(data: self.data)
     }
 }
 
 extension JSON {
-    func rawBytes()  -> PythonData? {
+    func rawBytes()  -> PythonJsonData? {
         do {
             let data = try self.rawData()
-            return data.asPythonData
+            return data.pythonJsonData
         } catch {
             print(error.localizedDescription)
             return nil
@@ -36,7 +36,7 @@ extension Collection {
         return json_names
     }
     
-    func asJsonBytes() -> PythonData! {
+    func asJsonBytes() -> PythonJsonData! {
         let json = JSON(self)
         return json.rawBytes()
     }
