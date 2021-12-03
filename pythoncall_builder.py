@@ -15,6 +15,37 @@ from cython import struct
 OSX_VERSION = ".".join(platform.mac_ver()[0].split(".")[:-1])
 PY_VERSION = ".".join(platform.python_version_tuple()[:-1])
 
+def parse_helper(string: str):
+    module = ast.parse(string)
+    body_list = module.body
+    for class_body in body_list:
+        if isinstance(class_body,ast.ClassDef):
+            class_list = class_body.body
+            
+            cbody_del_list = []
+            for cbody in class_body.body:
+                _cdec = None
+                dec_list = [dec.id for dec in cbody.decorator_list]
+                
+                
+
+                if "callback" in dec_list:
+                    #class_body.body.remove(cbody)
+                    cbody_del_list.append(cbody)
+                else:
+                    cbody: ast.FunctionDef
+                    for arg in cbody.args.args:
+                        anno = ast.Name
+                        anno.id = "class"
+                    cbody.args.args.insert(0,ast.arg(arg="self",annotation = None))
+                    #cbody.args.args()
+            
+            for rem_body in cbody_del_list:
+                class_body.body.remove(rem_body)
+
+    src = astor.to_source(module)
+    return src
+
 class PyWrapClass:
 
     def __init__(self):
