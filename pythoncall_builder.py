@@ -15,7 +15,7 @@ from cython import struct
 OSX_VERSION = ".".join(platform.mac_ver()[0].split(".")[:-1])
 PY_VERSION = ".".join(platform.python_version_tuple()[:-1])
 
-def parse_helper(string: str):
+def parse_helper(string: str, d: dict):
     module = ast.parse(string)
     body_list = module.body
     for class_body in body_list:
@@ -29,19 +29,52 @@ def parse_helper(string: str):
                 
                 
 
-                if "callback" in dec_list:
-                    #class_body.body.remove(cbody)
-                    cbody_del_list.append(cbody)
-                else:
+                # if "callback" in dec_list:
+                #     #class_body.body.remove(cbody)
+                #     cbody_del_list.append(cbody)
+                # else:
+                if True:
                     cbody: ast.FunctionDef
                     for arg in cbody.args.args:
-                        anno = ast.Name
-                        anno.id = "class"
+                        if isinstance(arg, ast.arg):
+                            anno = arg.annotation
+                        else:
+                            anno = arg
+                        
+                        if isinstance(anno, ast.Subscript):
+            
+                            _anno_ = anno
+                            sub_id: str = _anno_.value.id
+                            #print("\t",sub_id)
+                            if sub_id == "list":
+                                is_list = True
+                                t = _anno_.slice.id
+                                _anno_.slice.id = d[t]
+                            if sub_id == "tuple":
+                                is_tuple = True
+                                
+                                #print(_anno_.__dict__)
+                                t = sub_id
+                                #Exception()
+
+                        
+                        else:
+                            # print("\tnot subscript")
+                            if isinstance(arg, ast.Name):
+                                t = arg.id
+                                arg.id = d[t]
+                            else:
+                                t = arg.annotation.id
+                                arg.annotation.id = d[t]
+                        
+                        
+                        
+                        
                     cbody.args.args.insert(0,ast.arg(arg="self",annotation = None))
                     #cbody.args.args()
             
-            for rem_body in cbody_del_list:
-                class_body.body.remove(rem_body)
+            # for rem_body in cbody_del_list:
+            #     class_body.body.remove(rem_body)
 
     src = astor.to_source(module)
     return src
