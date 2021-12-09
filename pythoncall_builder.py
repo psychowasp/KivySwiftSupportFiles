@@ -25,7 +25,7 @@ def parse_helper(string: str, d: dict):
             cbody_del_list = []
             for cbody in class_body.body:
                 _cdec = None
-                dec_list = [dec.id for dec in cbody.decorator_list]
+                #dec_list = [dec.id for dec in cbody.decorator_list]
                 
                 
 
