@@ -20,15 +20,10 @@ def parse_helper(string: str, d: dict):
     body_list = module.body
     for class_body in body_list:
         if isinstance(class_body,ast.ClassDef):
-            class_list = class_body.body
+            #class_list = class_body.body
             
-            cbody_del_list = []
+            #cbody_del_list = []
             for cbody in class_body.body:
-                _cdec = None
-                #dec_list = [dec.id for dec in cbody.decorator_list]
-                
-                
-
                 # if "callback" in dec_list:
                 #     #class_body.body.remove(cbody)
                 #     cbody_del_list.append(cbody)
@@ -40,36 +35,24 @@ def parse_helper(string: str, d: dict):
                             anno = arg.annotation
                         else:
                             anno = arg
-                        
                         if isinstance(anno, ast.Subscript):
-            
                             _anno_ = anno
                             sub_id: str = _anno_.value.id
-                            #print("\t",sub_id)
                             if sub_id == "list":
-                                is_list = True
+                                #is_list = True
                                 t = _anno_.slice.id
                                 _anno_.slice.id = d[t]
                             if sub_id == "tuple":
-                                is_tuple = True
-                                
                                 #print(_anno_.__dict__)
                                 t = sub_id
-                                #Exception()
-
-                        
                         else:
-                            # print("\tnot subscript")
                             if isinstance(arg, ast.Name):
                                 t = arg.id
                                 arg.id = d[t]
                             else:
                                 t = arg.annotation.id
                                 arg.annotation.id = d[t]
-                        
-                        
-                        
-                        
+
                     cbody.args.args.insert(0,ast.arg(arg="self",annotation = None))
                     #cbody.args.args()
             
@@ -80,9 +63,9 @@ def parse_helper(string: str, d: dict):
     return src
 
 class PyWrapClass:
-
+    types: list[str]
     def __init__(self):
-        super(PyWrapClass, self).__init__()
+        ...
 
     @staticmethod
     def json_export(wrap_title: str, string:str) -> str:
@@ -100,7 +83,6 @@ class PyWrapClass:
                     assign_t = body.value.func.id
 
                     if assign_t == "struct":
-                        
                         #print(f"struct {''}: {body.value}")
                         type_var_list.append(json.dumps({
                             "type:": "struct",
@@ -207,6 +189,7 @@ class PyWrapClass:
         is_list = False
         is_data = False
         is_tuple = False
+        other_type = False
         # print("\nhandle_arg_type:")
         # print("\treturn",returns,arg,arg.__dict__)
         
@@ -291,8 +274,8 @@ class PyWrapClass:
             "name": body.name,
             "args": arg_list,
             "returns": _return_,
-            "is_callback": False,
-            "swift_func": False,
+            #"is_callback": False,
+            #"swift_func": False,
         }
         self.handle_function_decorators(body,func)
         
