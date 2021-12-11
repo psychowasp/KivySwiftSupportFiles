@@ -7,6 +7,36 @@ from ctypes import c_long
 from typing import List,Tuple,TypeVar
 from cython import struct
 #from ctypes import c_int8 as
+
+
+__all__ = [
+    "long",
+    "ulong",
+    "longlong",
+    "ulonglong",
+    "uint8",
+    "int16",
+    "uint16",
+    "int32",
+    "uint32",
+    "data",
+    "json",
+    "jsondata",
+    "uint",
+    "double",
+    "float32",
+    ## other types
+    "TypeVar",
+    "struct",
+    "List",
+    "Tuple",
+    "callback",
+    "call_class",
+    "call_target",
+    "swift_func",
+    "EventDispatcher"
+    ]
+
 int32 = c_int
 long = c_long
 ulong = c_ulong
@@ -25,33 +55,6 @@ double = c_double
 float32 = c_float
 longdouble = c_longdouble
 
-__all__ = [
-    "long",
-    "ulong",
-    "longlong",
-    "ulonglong",
-    "uint8",
-    "int16",
-    "uint16",
-    "int32",
-    "uint32"
-    "data",
-    "json",
-    "jsondata",
-    "uint",
-    "double",
-    "float32",
-    ## other types
-    "TypeVar",
-    "struct",
-    "List",
-    "Tuple",
-    "callback",
-    "call_class",
-    "call_target",
-    "swift_func",
-    "EventDispatcher"
-    ]
 
 def EventDispatcher(_: list[str]): ...
 
