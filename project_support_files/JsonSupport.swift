@@ -1,6 +1,7 @@
 //SwiftyJson Required
 //https://github.com/SwiftyJSON/SwiftyJSON
 import SwiftyJSON
+import Foundation
 
 extension PythonData {
     func asJson(withLength length: Int) -> JSON! {
@@ -39,6 +40,11 @@ extension Collection {
     func asJsonBytes() -> PythonJsonData! {
         let json = JSON(self)
         return json.rawBytes()
+    }
+    
+    func asData() -> Data {
+        let json = JSON(self)
+        return try! json.rawData()
     }
     
     
