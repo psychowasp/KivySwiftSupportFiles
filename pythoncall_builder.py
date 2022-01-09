@@ -122,7 +122,7 @@ def handle_arg_type(arg, count: int, returns: bool) -> dict:
         t = arg.id
     else:
         t = ""
-        print("ast.Other", type(arg), arg.__dict__)
+        #print("ast.Other", type(arg), arg.__dict__)
     # anno = None
     # if isinstance(arg, ast.arg):      
     #     anno = arg.annotation
