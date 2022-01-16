@@ -1,5 +1,7 @@
 //data
 //typedef unsigned char const* PythonData;
+#ifndef wrapper_typedefs_h
+#define wrapper_typedefs_h
 typedef struct PythonData {
 	unsigned char const* _Nonnull ptr;
 	long size;
@@ -100,3 +102,6 @@ typedef struct PythonList_PythonJsonData {
 	PythonJsonData const* _Nonnull ptr;
 	long size;
 } PythonList_PythonJsonData;
+
+
+#endif /* wrapper_typedefs_h */

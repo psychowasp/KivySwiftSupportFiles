@@ -31,7 +31,9 @@ def parse_helper(string: str, d: dict):
                     #     #class_body.body.remove(cbody)
                     #     cbody_del_list.append(cbody)
                     # else:
-                    if True:
+                    if isinstance(cbody, ast.Assign):
+                        pass
+                    else:
                         cbody: ast.FunctionDef
                         for arg in cbody.args.args:
                             if isinstance(arg, ast.arg):
@@ -199,8 +201,10 @@ def handle_arg_type(arg, count: int, returns: bool) -> dict:
 
 class PyWrapClass:
     types: list[str]
+    properties: list[dict]
+    
     def __init__(self):
-        ...
+        self.properties = []
 
     
     
@@ -268,7 +272,8 @@ class PyWrapClass:
         self.export_dict = {
             "title": class_body.name,
             "functions": functions,
-            "decorators": []
+            "decorators": [],
+            "properties": self.properties
         }
         self.calltitle = class_body.name
         
@@ -303,9 +308,46 @@ class PyWrapClass:
 
     def handle_class_children(self,child):
         for cbody in child:
-                
+            #print(type(cbody))
+            if isinstance(cbody, ast.Assign):
+                self.handle_class_properties(cbody)
             if isinstance(cbody,ast.FunctionDef):
                 self.handle_class_function(cbody)
+                
+    def handle_class_properties(self, body: ast.Assign):
+        print("property", body.targets[0].id)
+        print(f"\t{body.value.args[0].__dict__}")
+        t = body.value.func.id
+        
+        if t == "Property":
+            self.properties.append(
+                {
+                    "name": body.targets[0].id,
+                    "property_type": "Property",
+                    "arg_type":  {
+                        "name": "value",
+                        "type": body.value.args[0].id,
+                        "idx": 0,
+                                    
+                    }
+                    
+                }
+            )    
+        elif t == "StringProperty":
+            
+            self.properties.append(
+                {
+                    "name": body.targets[0].id,
+                    "property_type": "StringProperty",
+                    "arg_type":  {
+                        "name": "value",
+                        "type": "str",
+                        "idx": 0,
+                                    
+                    }
+                    
+                }
+            )    
 
     def handle_function_decorators(self, body: FunctionDef, func_dict: dict) -> List[str]:
         dec_list = []

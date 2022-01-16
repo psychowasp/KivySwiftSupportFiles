@@ -34,7 +34,9 @@ __all__ = [
     "call_class",
     "call_target",
     "swift_func",
-    "EventDispatcher"
+    "EventDispatcher",
+    "Codable",
+    "direct"
     ]
 
 int32 = c_int
@@ -65,3 +67,7 @@ def call_class(_: str): ...
 def call_target(_: str): ...
 
 def swift_func(): ...
+
+#def codable(): ...
+
+class Codable: ...
