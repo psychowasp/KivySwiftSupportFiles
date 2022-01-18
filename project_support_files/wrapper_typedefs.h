@@ -15,7 +15,7 @@ typedef char const* _Nonnull PythonString;
 typedef const char * _Nonnull PythonBytes;
 
 //object
-typedef PyObject PythonObject;
+typedef PyObject* PythonObject;
 
 //json
 typedef char const* _Nonnull PythonJsonString;
