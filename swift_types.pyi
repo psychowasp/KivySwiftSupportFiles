@@ -6,6 +6,7 @@ from ctypes import c_uint
 from ctypes import c_long
 from typing import List,Tuple,TypeVar
 from cython import struct
+from enum import Enum
 #from ctypes import c_int8 as
 
 
@@ -36,7 +37,11 @@ __all__ = [
     "swift_func",
     "EventDispatcher",
     "Codable",
-    "direct"
+    "direct",
+    "wrapper",
+    "python",
+    "Enum",
+    "send_self"
     ]
 
 int32 = c_int
@@ -68,6 +73,14 @@ def call_target(_: str): ...
 
 def swift_func(): ...
 
+def direct(): ...
+
 #def codable(): ...
 
 class Codable: ...
+
+def wrapper(dispatch_events: bool = False, events: list[str] = [], singleton: bool = True): ...
+
+def python(): ...
+
+def send_self(): ...

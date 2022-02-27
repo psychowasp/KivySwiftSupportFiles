@@ -8,11 +8,16 @@ typedef struct {
 	unsigned char const* _Nonnull ptr;
 	long size;
 } PythonData;
+
 //str
 typedef char const* _Nonnull PythonString;
 
 //bytes
-typedef const char * _Nonnull PythonBytes;
+//typedef const char * _Nonnull PythonBytes;
+typedef struct {
+	unsigned char const* _Nonnull ptr;
+	long size;
+} PythonBytes;
 
 //object
 typedef PyObject* PythonObject;
