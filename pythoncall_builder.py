@@ -474,7 +474,7 @@ class PyWrapClass:
                                 
                                 match key:
                                     case "dispatch_events":
-                                        
+                                        events = get_key("events", keywords)
                                         if events:
                                             _events_ = [event.value for event in events.value.elts]
                                             d = {
