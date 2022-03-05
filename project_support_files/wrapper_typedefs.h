@@ -8,19 +8,18 @@ typedef struct {
 	unsigned char const* _Nonnull ptr;
 	long size;
 } PythonData;
-
 //str
 typedef char const* _Nonnull PythonString;
 
 //bytes
-//typedef const char * _Nonnull PythonBytes;
-typedef struct {
-	unsigned char const* _Nonnull ptr;
-	long size;
-} PythonBytes;
+typedef const char * _Nonnull PythonBytes;
 
 //object
-typedef PyObject* PythonObject;
+//typedef PyObject* _Nonnull PythonObject;
+
+typedef PyObject* _Nullable PythonPointer;
+
+typedef void const* _Nonnull CythonClass;
 
 //json
 typedef char const* _Nonnull PythonJsonString;
@@ -88,12 +87,13 @@ typedef struct {
 } PythonList_Float;
 //list_object
 typedef struct {
-	void const* _Nonnull ptr;
+    const PythonPointer * ptr;
+    //const PythonObject * ptr;
 	long size;
 } PythonList_PythonObject;
 //list_string
 typedef struct {
-	char const* _Nonnull const* _Nonnull ptr;
+	const PythonString * ptr;
 	long size;
 } PythonList_PythonString;
 

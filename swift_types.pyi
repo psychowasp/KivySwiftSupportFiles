@@ -7,6 +7,7 @@ from ctypes import c_long
 from typing import List,Tuple,TypeVar
 from cython import struct
 from enum import Enum
+from collections.abc import Sequence as sequence
 #from ctypes import c_int8 as
 
 
@@ -41,7 +42,8 @@ __all__ = [
     "wrapper",
     "python",
     "Enum",
-    "send_self"
+    "send_self",
+    "sequence"
     ]
 
 int32 = c_int
