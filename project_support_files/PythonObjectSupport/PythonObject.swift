@@ -24,15 +24,138 @@ public class PythonObjectSlim {
 }
 
 
+
+@dynamicMemberLookup
 public struct PythonObject {
     public let ptr: PythonPointer
     private let object_autorelease: PythonPointerAutoRelease
     
     public init(ptr: PythonPointer, keep_alive: Bool = false, from_getter: Bool = false) {
+        print("initing PythonObject",ptr, ptr!.pointee.ob_refcnt)
         self.ptr = ptr
         self.object_autorelease = PythonPointerAutoRelease(pointer: ptr, keep: keep_alive, from_getattr: from_getter)
     }
+    
+    subscript(dynamicMember member: String) -> PythonPointer {
+        get {
+            let obj: PythonPointer = PyObject_GetAttrString(ptr, member)
+            Py_DecRef(ptr)
+            return obj
+        }
+        set {
+            PyObject_SetAttrString(ptr, member, newValue)
+        }
+    }
+
+    
+    
+    subscript(dynamicMember member: String) -> PythonObject {
+        get {
+            PythonObject(ptr: PyObject_GetAttrString(ptr, member) , from_getter: true)
+        }
+        set {
+            PyObject_SetAttrString(ptr, member, newValue.ptr)
+        }
+    }
+    
+  
+    
+    subscript(dynamicMember member: String) -> Int {
+        get {
+            let obj = PyObject_GetAttrString(ptr, member)
+            Py_DecRef(obj)
+            return PyLong_AsLong(obj)
+        }
+        set {
+            let obj = PyLong_FromLong(newValue)
+            PyObject_SetAttrString(ptr, member, obj)
+            Py_DecRef(obj)
+        }
+    }
+    
+    
+//    subscript(dynamicMember member: PythonPointer) -> PythonPointer {
+//        get {
+//            PyObject_GetAttr(ptr, member)
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member, newValue)
+//        }
+//    }
+    
+//    subscript(dynamicMember member: PythonPointer) -> PythonPointer? {
+//        get {
+//            PyObject_GetAttr(ptr, member)
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member, newValue)
+//        }
+//    }
+//
+//    subscript(dynamicMember member: PythonPointer?) -> PythonPointer {
+//        get {
+//            PyObject_GetAttr(ptr, member)
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member, newValue)
+//        }
+//    }
+//
+//    subscript(dynamicMember member: PythonPointer?) -> PythonPointer? {
+//        get {
+//            PyObject_GetAttr(ptr, member)
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member, newValue)
+//        }
+//    }
+//
+//    subscript(dynamicMember member: PythonObject) -> PythonPointer {
+//        get {
+//            PyObject_GetAttr(ptr, member.ptr)
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member.ptr, newValue)
+//        }
+//    }
+//
+//    subscript(dynamicMember member: PythonObject) -> PythonPointer? {
+//        get {
+//            PyObject_GetAttr(ptr, member.ptr)
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member.ptr, newValue)
+//        }
+//    }
+    
+//    subscript(dynamicMember member: PythonObject) -> PythonObject {
+//        get {
+//            PythonObject(ptr: PyObject_GetAttr(ptr, member.ptr))
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member.ptr, newValue.ptr)
+//        }
+//    }
+//
+//    subscript(dynamicMember member: PythonPointer) -> PythonObject {
+//        get {
+//            PythonObject(ptr: PyObject_GetAttr(ptr, member))
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member, newValue.ptr)
+//        }
+//    }
+//
+//    subscript(dynamicMember member: PythonPointer?) -> PythonObject {
+//        get {
+//            PythonObject(ptr: PyObject_GetAttr(ptr, member))
+//        }
+//        set {
+//            PyObject_SetAttr(ptr, member, newValue.ptr)
+//        }
+//    }
 }
+
 
 
 
@@ -40,7 +163,7 @@ public struct PythonObject {
 
 extension PythonObject {
     
-    @inlinable public var ref_count: Int { ptr.pointee.ob_refcnt }
+    @inlinable public var ref_count: Int { ptr!.pointee.ob_refcnt }
     
     @inlinable public var int: Int { PyLong_AsLong(ptr) }
     @inlinable public var uint: UInt { PyLong_AsUnsignedLong(ptr)}

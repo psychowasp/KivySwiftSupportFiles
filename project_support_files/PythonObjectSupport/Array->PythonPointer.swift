@@ -1,6 +1,6 @@
 extension Collection where Element == String {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyUnicode_FromString(element))
@@ -8,18 +8,34 @@ extension Collection where Element == String {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyUnicode_FromString(element))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyUnicode_FromString(element))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyUnicode_FromString(element))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == Int {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromLong(element))
@@ -27,18 +43,34 @@ extension Collection where Element == Int {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromLong(element))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLong(element))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLong(element))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == UInt {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromUnsignedLong(element))
@@ -46,18 +78,34 @@ extension Collection where Element == UInt {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(element))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLong(element))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(element))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == Int64 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromLongLong(element))
@@ -65,18 +113,34 @@ extension Collection where Element == Int64 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromLongLong(element))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLongLong(element))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLongLong(element))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == UInt64 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromUnsignedLongLong(element))
@@ -84,18 +148,34 @@ extension Collection where Element == UInt64 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLongLong(element))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLongLong(element))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLongLong(element))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == Int32 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromLong(Int(element)))
@@ -103,18 +183,34 @@ extension Collection where Element == Int32 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
         }
         return tuple
+    }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLong(Int(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
+        }
+        return tuple!
     }
 }
 
 extension Collection where Element == UInt32 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
@@ -122,18 +218,34 @@ extension Collection where Element == UInt32 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
         }
         return tuple
+    }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return tuple!
     }
 }
 
 extension Collection where Element == Int16 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromLong(Int(element)))
@@ -141,18 +253,34 @@ extension Collection where Element == Int16 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
         }
         return tuple
+    }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLong(Int(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
+        }
+        return tuple!
     }
 }
 
 extension Collection where Element == UInt16 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
@@ -160,18 +288,34 @@ extension Collection where Element == UInt16 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == Int8 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromLong(Int(element)))
@@ -179,18 +323,34 @@ extension Collection where Element == Int8 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLong(Int(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == UInt8 {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
@@ -198,18 +358,34 @@ extension Collection where Element == UInt8 {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == Float {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyFloat_FromDouble(Double(element)))
@@ -217,18 +393,34 @@ extension Collection where Element == Float {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyFloat_FromDouble(Double(element)))
         }
         return tuple
     }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyFloat_FromDouble(Double(element)))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyFloat_FromDouble(Double(element)))
+        }
+        return tuple!
+    }
 }
 
 extension Collection where Element == Double {
-
-    public var list_object: PythonPointer? {
+    
+    public var list_object: PythonPointer {
         let list = PyList_New(0)
         for element in self {
             PyList_Append(list, PyFloat_FromDouble(element))
@@ -236,11 +428,27 @@ extension Collection where Element == Double {
         return list
     }
 
-    public var tuple_object: PythonPointer? {
+    public var tuple_object: PythonPointer {
         let tuple = PyTuple_New(self.count)
         for (i, element) in self.enumerated() {
             PyTuple_SetItem(tuple, i, PyFloat_FromDouble(element))
         }
         return tuple
+    }
+
+    public var _list_object: PythonPointerU {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyFloat_FromDouble(element))
+        }
+        return list!
+    }
+
+    public var _tuple_object: PythonPointerU {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyFloat_FromDouble(element))
+        }
+        return tuple!
     }
 }

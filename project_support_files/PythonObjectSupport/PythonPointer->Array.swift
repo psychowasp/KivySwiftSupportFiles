@@ -56,15 +56,15 @@ extension PythonPointer {
 
 
     @inlinable
-    public __consuming func array() -> [PythonPointer?] {
+    public __consuming func array() -> [PythonPointerU] {
         let fast_list = PySequence_Fast(self, "")
         let list_count = PythonSequence_Fast_GET_SIZE(fast_list)
         let fast_items = PythonSequence_Fast_ITEMS(fast_list)
         let buffer = UnsafeBufferPointer(start: fast_items, count: list_count)
-        var array = [PythonPointer?]()
+        var array = [PythonPointerU]()
         array.reserveCapacity(buffer.count)
         for element in buffer {
-            array.append(element)
+            array.append(element!)
         }
         Py_DecRef(fast_list)
         return array

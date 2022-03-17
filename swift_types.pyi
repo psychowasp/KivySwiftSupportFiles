@@ -1,5 +1,5 @@
 from ctypes import c_double, c_float, c_int, c_int16, c_long, c_longdouble, c_longlong, c_short, c_uint16, c_ulong, c_ulonglong
-from ctypes import c_uint8
+from ctypes import c_uint8, c_uint32
 from ctypes import c_uint8
 from ctypes import c_int8 
 from ctypes import c_uint
@@ -43,10 +43,13 @@ __all__ = [
     "python",
     "Enum",
     "send_self",
-    "sequence"
+    "sequence",
+    "ObjectStrEnum",
+    "ObjectIntEnum"
     ]
 
 int32 = c_int
+uint32 = c_uint32
 long = c_long
 ulong = c_ulong
 longlong = c_longlong
@@ -67,22 +70,35 @@ longdouble = c_longdouble
 
 def EventDispatcher(_: list[str]): ...
 
-def callback(): ...
+def callback(direct: bool): ...
 
-def call_class(_: str): ...
+def call_class(class_name: str): ...
 
-def call_target(_: str): ...
+def call_target(class_name: str): ...
 
 def swift_func(): ...
 
-def direct(): ...
+def _direct(): ...
 
 #def codable(): ...
 
 class Codable: ...
 
-def wrapper(dispatch_events: bool = False, events: list[str] = [], singleton: bool = True): ...
+#def wrapper(dispatch_events: bool = False, events: list[str] = [], singleton: bool = True): ...
+
+class wrapper:
+    
+    def __init__(self, *args, **kwargs): ...
+    
+    def __call__(self, *args, **kwargs): ...
 
 def python(): ...
 
+
 def send_self(): ...
+
+ObjectStrEnum = Enum
+
+ObjectIntEnum = Enum
+
+direct = _direct()

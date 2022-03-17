@@ -12,7 +12,7 @@ extension PythonPointer {
             if PythonTuple_Check(self) {
                 return PyTuple_GetItem(self, index)!
             }
-            fatalError()
+            return nil
             }
             
         set {
@@ -26,7 +26,7 @@ extension PythonPointer {
     }
 
     @inlinable
-    public subscript(index: Int) -> PythonPointer? {
+    public subscript(index: Int) -> PythonPointerU {
         
         get {
             if PythonList_Check(self) {
@@ -49,10 +49,10 @@ extension PythonPointer {
     }
 
     @inlinable
-    public subscript(bounds: Range<Int>) -> PythonPointer? {
+    public subscript(bounds: Range<Int>) -> PythonPointerU {
         get {
             if PythonList_Check(self) { return PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound) }
-            return nil
+            fatalError()
         }
         set {
             if PythonList_Check(self) { PyList_SetSlice(self, bounds.lowerBound, bounds.upperBound, newValue) }
@@ -63,7 +63,7 @@ extension PythonPointer {
     public subscript(bounds: Range<Int>) -> PythonPointer {
         get {
             if PythonList_Check(self) { return PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound) }
-            fatalError()
+            return nil
         }
         set {
             if PythonList_Check(self) { PyList_SetSlice(self, bounds.lowerBound, bounds.upperBound, newValue) }
@@ -108,7 +108,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [String] = temp!.array()
+                let array: [String] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -161,7 +161,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Int] = temp!.array()
+                let array: [Int] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -214,7 +214,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [UInt] = temp!.array()
+                let array: [UInt] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -267,7 +267,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Int64] = temp!.array()
+                let array: [Int64] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -320,7 +320,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [UInt64] = temp!.array()
+                let array: [UInt64] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -373,7 +373,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Int32] = temp!.array()
+                let array: [Int32] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -426,7 +426,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [UInt32] = temp!.array()
+                let array: [UInt32] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -479,7 +479,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Int16] = temp!.array()
+                let array: [Int16] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -532,7 +532,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [UInt16] = temp!.array()
+                let array: [UInt16] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -585,7 +585,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Int8] = temp!.array()
+                let array: [Int8] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -638,7 +638,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [UInt8] = temp!.array()
+                let array: [UInt8] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -691,7 +691,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Float] = temp!.array()
+                let array: [Float] = temp.array()
                 Py_DecRef(temp)
                 return array
             }
@@ -744,7 +744,7 @@ extension PythonPointer {
         get {
             if PythonList_Check(self) {
                 let temp = PyList_GetSlice(self, bounds.lowerBound, bounds.upperBound)
-                let array: [Double] = temp!.array()
+                let array: [Double] = temp.array()
                 Py_DecRef(temp)
                 return array
             }

@@ -1,6 +1,6 @@
-
 import ast
 from ast import *
+from os import remove
 from pickle import FALSE
 
 import astor
@@ -11,10 +11,15 @@ from typing import List
 from pathlib import Path
 from cython import struct
 
+
+
 PRINTTAB = "\t"
 
 OSX_VERSION = ".".join(platform.mac_ver()[0].split(".")[:-1])
 PY_VERSION = ".".join(platform.python_version_tuple()[:-1])
+
+
+wrap_module_shared = None
 
 def handle_imports(body: ast.ImportFrom):
     print(body.module.__dict__)
@@ -25,83 +30,99 @@ def handle_wrapped_class(class_body: ast.ClassDef, d: dict, pyi_mode: bool):
         #     #class_body.body.remove(cbody)
         #     cbody_del_list.append(cbody)
         # else:
+        match cbody:
+            case ast.Assign():
+                pass
+            case ast.AnnAssign():
+                pass
+            case ast.Expr():
+                pass
+            
+            case ast.FunctionDef():
+                
 
-        if isinstance(cbody, ast.Assign):
-            pass
-        elif isinstance(cbody, ast.AnnAssign):
-            pass
-        else:
-            cbody: ast.FunctionDef
-            for arg in cbody.args.args:
-                if isinstance(arg, ast.arg):
-                    anno = arg.annotation
-                else:
-                    anno = arg
-                if isinstance(anno, ast.Subscript):
-                    _anno_ = anno
-                    match _anno_:
-                        case "list" | "sequence":
-                            t = _anno_.slice.id
-                            if t in d:
-                                _anno_.slice.id = d[t]
-                            else:
-                                _anno_.slice.id = t
-                        case "tuple":        
-                            t = _anno_.value.id
-                        
-                    # sub_id: str = _anno_.value.id
-                    # if sub_id == "list":
-                    #     #is_list = True
-                    #     t = _anno_.slice.id
-                    #     if t in d:
-                    #         _anno_.slice.id = d[t]
-                    #     else:
-                    #         _anno_.slice.id = t
-                    # elif sub_id == "sequence":
-                    #     #is_list = True
-                    #     t = _anno_.slice.id
-                    #     if t in d:
-                    #         _anno_.slice.id = d[t]
-                    #     else:
-                    #         _anno_.slice.id = t
-                        
-                    # elif sub_id == "tuple":
-                    #     #print(_anno_.__dict__)
-                    #     t = sub_id
-                else:
-                    if isinstance(arg, ast.Name):
-                        t = arg.id
-                        arg.id = d[t]
+        # if isinstance(cbody, ast.Assign):
+        #     pass
+        # elif isinstance(cbody, ast.AnnAssign):
+        #     pass
+        # elif isinstance(cbody, ast.Expr):
+        #     pass
+        # else:
+        #     cbody: ast.FunctionDef
+                for arg in cbody.args.args:
+                    if isinstance(arg, ast.arg):
+                        anno = arg.annotation
                     else:
-                        if arg.arg != "self" or pyi_mode:
-                            if arg.annotation:
-                                t = arg.annotation.id
+                        anno = arg
+                    if isinstance(anno, ast.Subscript):
+                        _anno_ = anno
+                        match _anno_:
+                            case "list" | "sequence":
+                                t = _anno_.slice.id
                                 if t in d:
-                                    arg.annotation.id = d[t]
-                        
-            if pyi_mode:
-                cbody.args.args.insert(0,ast.arg(arg="self",annotation = None))
+                                    _anno_.slice.id = d[t]
+                                else:
+                                    _anno_.slice.id = t
+                            case "tuple":        
+                                t = _anno_.value.id
+                            
+                    else:
+                        if isinstance(arg, ast.Name):
+                            t = arg.id
+                            arg.id = d[t]
+                        else:
+                            if arg.arg != "self" or pyi_mode:
+                                if arg.annotation:
+                                    t = arg.annotation.id
+                                    if t in d:
+                                        arg.annotation.id = d[t]
+                            
+                if pyi_mode:
+                    cbody.args.args.insert(0,ast.arg(arg="self",annotation = None))
         
-def parse_helper(string: str, d: dict, extra: str = ""):
+def parse_helper(string: str, d: dict, extra: str = "", sphinx_mode = False):
     module = ast.parse(string)
     body_list = module.body
     excluded_classes = [] 
+    remove_stuff = []
     for class_body in body_list:
-        if isinstance(class_body,ast.ClassDef):
-            #class_list = class_body.body
+        
+        match class_body:
+            case ast.Import():...
+                #exit(0)
+            case ast.ImportFrom():...
+                #remove_stuff.append(class_body)
+            case ast.ClassDef():
+                class_body.decorator_list.clear()
+                # for dec in class_body.decorator_list:
+                class_body.body
+                #     remove_stuff.append(dec)
+                bases = [base.id for base in class_body.bases]
+                if "Codable" in bases:
+                    pass
+                else:
+                #cbody_del_list = []
+                    handle_wrapped_class(class_body, d, False)
+                
+            case ast.Assign:
+                handleGlobalAssigns(module,class_body)
+        # if isinstance(class_body,ast.ClassDef):
+        #     #class_list = class_body.body
             
-            bases = [base.id for base in class_body.bases]
-            if "Codable" in bases:
-                pass
-            else:
-            #cbody_del_list = []
-                handle_wrapped_class(class_body, d, False)
+        #     bases = [base.id for base in class_body.bases]
+        #     if "Codable" in bases:
+        #         pass
+        #     else:
+        #     #cbody_del_list = []
+        #         handle_wrapped_class(class_body, d, False)
                 
                 
-                # for rem_body in cbody_del_list:
-                #     class_body.body.remove(rem_body)
-        elif isinstance(class_body, ast.Assign):
-            handleGlobalAssigns(module,class_body)
+        #         # for rem_body in cbody_del_list:
+        #         #     class_body.body.remove(rem_body)
+        # elif isinstance(class_body, ast.Assign):
+        #     handleGlobalAssigns(module,class_body)
+    for c in remove_stuff:
+        module.body.remove(c)
             
     add_enums(module, extra)
     src = astor.to_source(module)
@@ -115,14 +136,14 @@ def add_enums(module: ast.Module, extra: str):
 
 def handleGlobalAssigns(module:ast.Module, body: ast.Assign):
     value = body.value
-    print("handleGlobalAssigns:")
+    #print("handleGlobalAssigns:")
     if isinstance(value, ast.Call):
         func = value.func
         id = func.id
-        print(f"\tid: {func.id} {func}")
-        print(f"\tfunc: {value.func}")
-        print(f"\targs: {value.args}")
-        print(f"\tkeywords: {value.keywords}")
+        #print(f"\tid: {func.id} {func}")
+        #print(f"\tfunc: {value.func}")
+        #print(f"\targs: {value.args}")
+        #print(f"\tkeywords: {value.keywords}")
         if id == "Enum":
             module.body.remove(body)
 def get_class_decorators(body_list: list[ast.stmt]) -> list[str]:
@@ -134,29 +155,41 @@ def get_class_decorators(body_list: list[ast.stmt]) -> list[str]:
         output.append(body.id)
     return output
 
-def remove_class_decorator(body_list: list[ast.stmt], key: str):
+def remove_class_decorator(module: ast.Module,i, body_list: list[ast.stmt], key: str):
     target = None
     for body in body_list:
         if isinstance(body, ast.Call):
             t = body.func.id
+            
+            
         else:
             t = body.id
         if t == key:
             target = body
             break
     if target:
-        body_list.remove(target)
+        module.body[i].decorator_list.remove(target)
+        #cbody.decorator_list.remove(target)
+        #cbody.remove(target)
+        #body_list.remove(target)
+    #exit(0)
 
 def extract_python_classes(string: str) -> str:
     module = ast.parse(string)
     body_list = module.body
     excluded_classes = [] 
-    for class_body in body_list:
+    for i, class_body in enumerate(body_list):
         if isinstance(class_body,ast.ClassDef):
             deco_list = get_class_decorators(class_body.decorator_list)
+            
             if "python" in deco_list:
-                remove_class_decorator(class_body.decorator_list,"python")
+                
+                remove_class_decorator(module,i,class_body.decorator_list,"python")
+                #remove_class_decorator(class_body.decorator_list,"python")
                 continue
+            if "wrapper" in deco_list:
+                remove_class_decorator(module,i,class_body.decorator_list,"wrapper")
+                #continue
             
             excluded_classes.append(class_body)
     
@@ -164,12 +197,18 @@ def extract_python_classes(string: str) -> str:
         if isinstance(imp, ast.ImportFrom):
             if imp.module == "swift_types":
                 body_list.remove(imp)
-    
+    excluded_assigns = []
     for assign in body_list:
         if isinstance(assign, ast.Assign):
             if isinstance(assign.value, ast.Call):
                 if assign.value.func.id == "Enum":
-                    body_list.remove(assign)
+                    excluded_assigns.append(assign)
+                    #body_list.remove(assign)
+                elif assign.value.func.id == "ObjectStrEnum":
+                    excluded_assigns.append(assign)
+                    #body_list.remove(assign)
+    for ann in excluded_assigns:
+        module.body.remove(ann)
     for cls in excluded_classes:
         module.body.remove(cls)
 
@@ -210,34 +249,17 @@ def handleSubscript(arg: ast.Subscript, options: list[str]) -> str:
         case "object":
             options.append("py_object")
             return arg.slice.id
+        case "memoryview":
+            options.append("memoryview")
+            return arg.slice.id
     if isinstance(arg.slice, ast.Slice):
         options.append("memoryview")
         return sub_id
-            
-    # if sub_id == "list":
-    #     options.append("list")
-    #     return arg.slice.id
-    # elif sub_id == "sequence":
-    #     options.append("sequence")
-    #     options.append("py_object")
-    #     return arg.slice.id
-    # elif sub_id == "tuple":
-    #     options.append("tuple")
-    #     return sub_id
-    # elif sub_id == "array":
-    #     options.append("array")
-    #     return arg.slice.id
-    # elif sub_id == "object":
-    #     options.append("py_object")
-    #     return arg.slice.id
-    # else:
-    #     if isinstance(arg.slice, ast.Slice):
-    #         options.append("memoryview")
-    #     return sub_id
 
 def handle_AnnAssign(arg: ast.AnnAssign, options: list[str]) -> str:
     #print("\thandle_AnnAssign",arg.__dict__)
     return arg.annotation.id
+
 
 def handle_arg_type(arg, count: int, returns: bool) -> dict:
 
@@ -352,87 +374,31 @@ class PyWrapClass:
     types: list[str]
     properties: list[dict]
     singleton: bool
+    functions: list[dict]
     
     def __init__(self, pyi_mode: bool = False):
         self.properties = []
         self.pyi_mode = pyi_mode
         self.singleton = False
-    
-    
-    
-    
-
-
-    # @staticmethod
-    # def json_export(wrap_title: str, string:str) -> str:
-    #     module = ast.parse(string)
-    #     wrap_list = []
-    #     custom_structs = []
-    #     type_var_list = []
-        
-    #     for body in module.body:
-    #         #print("\n")
-    #         #print(body)
-            
-
-    #         if isinstance(body,ast.Assign):
-    #             if isinstance(body.value, ast.Call):
-    #                 assign_t = body.value.func.id
-
-    #                 if assign_t == "struct":
-    #                     #print(f"struct {''}: {body.value}")
-    #                     type_var_list.append(json.dumps({
-    #                         "type:": "struct",
-    #                         "type_name": body.targets[0].id,
-    #                         "args": [{"key": key.arg, "type": key.value.id} for key in body.value.keywords]
-    #                     }))
-            
-    #         if isinstance(body,ast.ClassDef):
-    #             bases = [base.id for base in body.bases]
-    #             if "codable" in bases:
-    #                 pass
-    #                 #custom_structs.append()
-    #             else:
-    #                 wrap_class = PyWrapClass()
-    #                 js = wrap_class.parse_code_json(body)
-    #                 #wrap_class.parse_code(class_body)
-    #                 #wrap_class.setup_callback_type()
-    #                 wrap_list.append(js)
-            
-    #         #print("\n")
-    #     #print(type_var_list)
-    #     wrap_module = {
-    #         "filename": wrap_title,
-    #         "classes": wrap_list,
-    #         "typevars": type_var_list,
-    #         "custom_structs": custom_structs
-    #     }
-
-       
-    #     # with open("./class_export.json", "w") as f:
-    #     #     json.dump(wrap_module, f)
-    #     return json.dumps(wrap_module)
-
-
-        
-        
+        self.functions = []
     
 
     def parse_code_json(self,class_body):
-        functions = []
+        #functions = []
         self.export_dict = {
             "title": class_body.name,
-            "functions": functions,
+            "functions": self.functions,
             "decorators": [],
             "properties": self.properties,
-            "singleton": self.singleton
+            
         }
         self.calltitle = class_body.name
         
         self.handle_class_decorators(class_body)
         #self.gen_send_start_function(send_functions)
         self.handle_class_children(class_body.body)
-
+    
+        self.export_dict["singleton"] = self.singleton
         return self.export_dict
 
     def handle_class_decorators(self,class_body: ast.ClassDef):
@@ -486,6 +452,11 @@ class PyWrapClass:
                                             self.export_dict["decorators"].append(d)
                                     case "sequences_as_object": ...
                                     case "str_as_object": ...
+                                    
+                                    case "singleton":
+                                        svalue = word.value
+                                        #if isinstance(svalue, ast.Constant):
+                                        self.singleton = svalue.value
                         
                 
             # if id == "EventDispatcher":
@@ -537,18 +508,23 @@ class PyWrapClass:
 
 
     def handle_class_children(self,child):
+        functions = self.export_dict["functions"]
         for cbody in child:
             #print(type(cbody))
             match cbody:
                 case ast.Assign():
                     self.handle_class_properties(cbody)
                 case ast.FunctionDef():
-                    print("found ast.FunctionDef")
                     self.handle_class_function(cbody)
-            # if isinstance(cbody, ast.Assign):
-            #     self.handle_class_properties(cbody)
-            # if isinstance(cbody,ast.FunctionDef):
-            #     self.handle_class_function(cbody)
+                case ast.ClassDef():
+                    name = cbody.name
+                    match name:
+                        case "Callbacks":
+                            print("ast.ClassDef")
+                            print(cbody.__dict__)
+                            for fbody in cbody.body:
+                                if isinstance(fbody, ast.FunctionDef):
+                                    self.handle_callbacks(fbody)
                 
     def handle_class_properties(self, body: ast.Assign):
 
@@ -578,45 +554,14 @@ class PyWrapClass:
                         }
                     }
                 ) 
-            
-        # if t == "Property":
-        #     self.properties.append(
-        #         {
-        #             "name": body.targets[0].id,
-        #             "property_type": "Property",
-        #             "arg_type":  {
-        #                 "name": "value",
-        #                 "type": body.value.args[0].id,
-        #                 "idx": 0,           
-        #             }
-        #         }
-        #     )    
-        # elif t == "StringProperty":
-            
-        #     self.properties.append(
-        #         {
-        #             "name": body.targets[0].id,
-        #             "property_type": "StringProperty",
-        #             "arg_type":  {
-        #                 "name": "value",
-        #                 "type": "str",
-        #                 "idx": 0,
-                                    
-        #             }
-                    
-        #         }
-        #     )    
+              
         
     def handle_callback_decorator(self, dec: object, func_dict: dict, options: list[str]):
-        #print("handle_callback_decorator")
-        #print(dec.func.id)
-        #print(dec.__dict__)
         keywords: list[ast.keyword] = dec.keywords
         for word in keywords:
             key = word.arg
             value = word.value.value
-            #print(key.arg,key.value.value)
-            #print(key.__dict__)
+
             if key == "direct":
                 #func_dict["direct"] = True
                 options.append("direct")
@@ -626,7 +571,6 @@ class PyWrapClass:
     def handle_function_decorators(self, body: FunctionDef, func_dict: dict) -> List[str]:
         dec_list = []
         options = []
-        print("handle_function_decorators")
         for decorator in body.decorator_list:
             
             if isinstance(decorator,ast.Call):
@@ -636,7 +580,6 @@ class PyWrapClass:
                     
             else:
                 t = decorator.id
-            print("matching", t)
             match t:
                 case "callback":
                     options.append("callback")
@@ -652,44 +595,53 @@ class PyWrapClass:
                     func_dict["call_object"] = decorator.args[0].value
                 case "direct":
                     options.append("direct")
-                    
+        if "options" in func_dict:
+            func_dict["options"].extend(options)
+            return
+        
         func_dict["options"] = options
-            # if t == "callback":
-            #     #func_dict["is_callback"] = True
-            #     options.append("callback")
-            
-            # elif t == "send_self":
-            #     options.append("send_self")
-
-            # elif t == "swift_func":
-            #     #func_dict["swift_func"] = True
-            #     options.append("swift_func")
-            
-            # elif t == "call_target":
-            #     func_dict["call_target"] = decorator.args[0].value
-            
-            # elif t == "call_class":
-            #     func_dict["call_class"] = decorator.args[0].value
-            
-            # elif t == "call_object":
-            #     func_dict["call_object"] = decorator.args[0].id
-            
-            # elif t == "direct":
-            #     #func_dict["direct"] = True
-            #     options.append("direct")
-        #func_dict["options"] = options
-       
+        
+    def handle_callbacks(self, body: ast.FunctionDef):
+        func_args = body.args.args
+        functions: list = self.functions
+        arg_list = []
+        returns = body.returns
+        if returns:
+            _return_ = handle_arg_type(returns, 0, True)
+        else:
+            _return_ = {
+            "name": "void",
+            "type": "void",
+            "idx": 0,
+            "is_return": True,
+        }
+        func = {
+            "name": body.name,
+            "args": arg_list,
+            "returns": _return_,
+            "options": ["callback"]
+        }
+        count = 0
+        for arg in func_args:
+            if arg.arg == "self":
+                continue
+            arg_data = handle_arg_type(arg,count,False)
+            arg_list.append(arg_data)
+            count += 1
+        
+        
+        self.handle_function_decorators(body,func)
+        functions.append(func)
+        
     
-    
-
     def handle_class_function(self, body: ast.FunctionDef):
         #print("function: ",body.name)
         func_args = body.args.args
-        functions: list = self.export_dict["functions"]
+        functions: list = self.functions
         arg_list = []
         returns = body.returns
         
-        singleton = False
+        singleton = self.singleton
 
 
         if returns:
@@ -713,7 +665,6 @@ class PyWrapClass:
         
         functions.append(func)
         count = 0
-        print("func:",func)
         func_options = func["options"]
         if not singleton:
             if "callback" in func_options:
@@ -762,7 +713,6 @@ class PyWrapClass:
             count += 1
 
 
-
 class PyWrapModule:
     filename: str
     pyi_mode: bool
@@ -773,6 +723,7 @@ class PyWrapModule:
     
 
     def __init__(self, wrap_title: str, string:str, pyi_mode: bool = False) -> str:
+        wrap_module_shared = self
         self.classes = []
         self.custom_structs = []
         self.filename = wrap_title
@@ -784,21 +735,41 @@ class PyWrapModule:
         self.custom_enums = []
         type_var_list = []
         
+        self.handleCustomEnums(module.body)
         
         for body in module.body:
-            #print("\n")
-            #print(body)
+            match body:
+                case ast.ClassDef():
+                    bases = [base.id for base in body.bases]
+                    deco_list = get_class_decorators(body.decorator_list)
+                    if "Codable" in bases:
+                        self.handleCustomClasses(body, bases)
+                        #custom_structs.append()
+                    elif "wrapper" in deco_list or self.pyi_mode:
+                        wrap_class = PyWrapClass()
+                        js = wrap_class.parse_code_json(body)
+                        self.classes.append(js)
+        py_src = extract_python_classes(string)
+        
+        self.python_classes.append(py_src)                   
+
+    
+    def export(self) -> str:
+        return json.dumps(self.__dict__)
+    
+    def handleCustomEnums(self, mbody: ast.Module):
+        for body in mbody:
             match body:
                 case ast.Assign():
                     match body.value:
                         case ast.Call():
                             match body.value.func.id:
-                                case "struct":
-                                    type_var_list.append(json.dumps({
-                                        "type:": "struct",
-                                        "type_name": body.targets[0].id,
-                                        "args": [{"key": key.arg, "type": key.value.id} for key in body.value.keywords]
-                                    }))
+                                # case "struct":
+                                #     type_var_list.append(json.dumps({
+                                #         "type:": "struct",
+                                #         "type_name": body.targets[0].id,
+                                #         "args": [{"key": key.arg, "type": key.value.id} for key in body.value.keywords]
+                                #     }))
                                 case "Enum":
                                     enum_keys = []
                                     for i, key in enumerate(body.value.args):
@@ -811,92 +782,22 @@ class PyWrapModule:
                                         "title": body.targets[0].id,
                                         "keys": enum_keys
                                     })
-                case ast.ClassDef():
-                    bases = [base.id for base in body.bases]
-                    deco_list = get_class_decorators(body.decorator_list)
-                    if "Codable" in bases:
-                        self.handleCustomClasses(body, bases)
-                        #custom_structs.append()
-                    elif "wrapper" in deco_list or self.pyi_mode:
-                        
-                        #else:
-                        wrap_class = PyWrapClass()
-                        js = wrap_class.parse_code_json(body)
-                        #wrap_class.parse_code(class_body)
-                        #wrap_class.setup_callback_type()
-                        self.classes.append(js)
-        py_src = extract_python_classes(string)
-        
-        self.python_classes.append(py_src)                   
+                                case "ObjectStrEnum":
+                                    print("\n\n\n\nObjectEnum Found\n\n\n\n")
+                                    enum_keys = []
+                                    for i, key in enumerate(body.value.args):
+                                        if isinstance(key, ast.Constant):
+                                            enum_keys.append({"key": key.value, "value": i})    
+                                    for key in body.value.keywords:
+                                        enum_keys.append({"key": key.arg, "value": key.value.value})
+                                    self.custom_enums.append({
+                                        "type": "object",
+                                        "subtype": "str",
+                                        "title": body.targets[0].id,
+                                        "keys": enum_keys
+                                    })
 
-        #     if isinstance(body,ast.Assign):
-        #         if isinstance(body.value, ast.Call):
-        #             assign_t = body.value.func.id
-        #             if assign_t == "struct":
-        #                 #print(f"struct {''}: {body.value}")
-        #                 type_var_list.append(json.dumps({
-        #                     "type:": "struct",
-        #                     "type_name": body.targets[0].id,
-        #                     "args": [{"key": key.arg, "type": key.value.id} for key in body.value.keywords]
-        #                 }))
-        #             elif assign_t == "Enum":
-        #                 enum_keys = []
-
-        #                 #enum_count = 0
-        #                 for i, key in enumerate(body.value.args):
-        #                     if isinstance(key, ast.Constant):
-        #                         enum_keys.append({"key": key.value, "value": i})
-                                
-                        
-        #                 for key in body.value.keywords:
-        #                     enum_keys.append({"key": key.arg, "value": key.value.value})
-        #                 self.custom_enums.append({
-        #                     "type": "int",
-        #                     "title": body.targets[0].id,
-        #                     "keys": enum_keys
-        #                 })
-            
-        #     if isinstance(body,ast.ClassDef):
-        #         bases = [base.id for base in body.bases]
-        #         deco_list = get_class_decorators(body.decorator_list)
-        #         if "Codable" in bases:
-        #             self.handleCustomClasses(body, bases)
-        #             #custom_structs.append()
-        #         elif "wrapper" in deco_list or self.pyi_mode:
-                    
-        #             #else:
-        #             wrap_class = PyWrapClass()
-        #             js = wrap_class.parse_code_json(body)
-        #             #wrap_class.parse_code(class_body)
-        #             #wrap_class.setup_callback_type()
-        #             self.classes.append(js)
-        
-        # py_src = extract_python_classes(string)
-        
-        # self.python_classes.append(py_src)        
-
-        # wrap_module = {
-        #     "filename": wrap_title,
-        #     "classes": wrap_list,
-        #     "typevars": type_var_list,
-        #     "custom_structs": custom_structs
-        # }
-
-       
-        # # with open("./class_export.json", "w") as f:
-        # #     json.dump(wrap_module, f)
-        # return json.dumps(wrap_module)
     
-    
-    def export(self) -> str:
-        return json.dumps(self.__dict__)
-    
-    def handleCustomEnums(self, cbody: ast.ClassDef, bases: list[str]):
-        if "str" in bases:
-            d = {
-                "title": cbody.name
-                
-            }
     
     def handleCustomClasses(self, cbody: ast.ClassDef, bases: list[str]):
         assigns: list[dict] = []

@@ -17,7 +17,7 @@ typedef const char * _Nonnull PythonBytes;
 //object
 //typedef PyObject* _Nonnull PythonObject;
 
-typedef PyObject* _Nullable PythonPointer;
+typedef PyObject* _Nullable PyPtr;
 
 typedef void const* _Nonnull CythonClass;
 

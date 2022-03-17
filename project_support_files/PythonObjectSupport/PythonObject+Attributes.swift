@@ -19,27 +19,27 @@ extension PythonPointer {
         return value
     }
     
-    @inlinable
-    func getAttr(key: PythonPointer?, dec_ref: Bool = true) -> Int {
-        let attr = PyObject_GetAttr(self, key)
-        let value = PyLong_AsLong(attr)
-        if dec_ref { Py_DecRef(attr) }
-        return value
-    }
+//    @inlinable
+//    func getAttr(key: PythonPointer?, dec_ref: Bool = true) -> Int {
+//        let attr = PyObject_GetAttr(self, key)
+//        let value = PyLong_AsLong(attr)
+//        if dec_ref { Py_DecRef(attr) }
+//        return value
+//    }
     
 }
 
 extension PythonObject {
     
-    @inlinable
-    func setAttr(key: String, value: PythonPointer?) {
-        PyObject_SetAttrString(ptr, key, value)
-    }
-    
-    @inlinable
-    func setAttr(key: PythonPointer?, value: PythonPointer?) {
-        PyObject_SetAttr(ptr, key, value)
-    }
+//    @inlinable
+//    func setAttr(key: String, value: PythonPointer?) {
+//        PyObject_SetAttrString(ptr, key, value)
+//    }
+//
+//    @inlinable
+//    func setAttr(key: PythonPointer?, value: PythonPointer?) {
+//        PyObject_SetAttr(ptr, key, value)
+//    }
     
     @inlinable
     func setAttr(key: String, value: PythonObject) {
@@ -71,15 +71,15 @@ extension PythonObject {
         PyObject_GetAttr(ptr, key)
     }
     
-    @inlinable
-    func getAttr(key: PythonPointer?) -> PythonPointer {
-        PyObject_GetAttr(ptr, key)
-    }
-    
-    @inlinable
-    func getAttr(key: PythonPointer?) -> PythonPointer? {
-        PyObject_GetAttr(ptr, key)
-    }
+//    @inlinable
+//    func getAttr(key: PythonPointer?) -> PythonPointer {
+//        PyObject_GetAttr(ptr, key)
+//    }
+//    
+//    @inlinable
+//    func getAttr(key: PythonPointer?) -> PythonPointer? {
+//        PyObject_GetAttr(ptr, key)
+//    }
     
     @inlinable
     func getAttr(key: String) -> PythonObject {

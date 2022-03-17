@@ -49,22 +49,22 @@ extension PythonPointer {
 
 
        
-    @inlinable
-    public subscript(index: String) -> PythonPointer? {
-        
-        get {
-            if PythonDict_Check(self) { PyDict_GetItemString(self, index) }
-            return nil
-                // Return an appropriate subscript value here.
-            }
-        set {
-            // Perform a suitable setting action here.
-            if PythonDict_Check(self) { PyDict_SetItemString(self, index, newValue) } else {
-                print("\(self)")
-            }
-        }
-    
-    }
+//    @inlinable
+//    public subscript(index: String) -> PythonPointer? {
+//        
+//        get {
+//            if PythonDict_Check(self) { PyDict_GetItemString(self, index) }
+//            return nil
+//                // Return an appropriate subscript value here.
+//            }
+//        set {
+//            // Perform a suitable setting action here.
+//            if PythonDict_Check(self) { PyDict_SetItemString(self, index, newValue) } else {
+//                print("\(self)")
+//            }
+//        }
+//    
+//    }
     
     @inlinable
     subscript(index: String) -> PythonPointer {
@@ -77,28 +77,28 @@ extension PythonPointer {
         set {
             // Perform a suitable setting action here.
             if PythonDict_Check(self) { PyDict_SetItemString(self, index, newValue) } else {
-                print("\(self)")
+                print("\(String(describing: self))")
             }
         }
     
     }
     
-    @inlinable
-    subscript(index: PythonPointer?) -> PythonPointer? {
-        
-        get {
-            if PythonDict_Check(self) { PyDict_GetItem(self, index) }
-            return nil
-                // Return an appropriate subscript value here.
-            }
-        set {
-            // Perform a suitable setting action here.
-            if PythonDict_Check(self) { PyDict_SetItem(self, index, newValue) } else {
-                print("\(self)")
-            }
-        }
-    
-    }
+//    @inlinable
+//    subscript(index: PythonPointer?) -> PythonPointer? {
+//        
+//        get {
+//            if PythonDict_Check(self) { PyDict_GetItem(self, index) }
+//            return nil
+//                // Return an appropriate subscript value here.
+//            }
+//        set {
+//            // Perform a suitable setting action here.
+//            if PythonDict_Check(self) { PyDict_SetItem(self, index, newValue) } else {
+//                print("\(self)")
+//            }
+//        }
+//    
+//    }
 }
 
 extension PythonPointer {
@@ -154,9 +154,9 @@ extension PythonPointer {
     }
     
     
-    @inlinable public mutating func insert(_ newElement: PythonPointer?, at i: Int) {
-        PyList_Insert(self, i, newElement)
-    }
+//    @inlinable public mutating func insert(_ newElement: PythonPointer?, at i: Int) {
+//        PyList_Insert(self, i, newElement)
+//    }
     
     @inlinable public mutating func insert(_ newElement: PythonPointer, at i: Int) {
         PyList_Insert(self, i, newElement)
@@ -219,9 +219,7 @@ extension PythonPointer {
     
     @inlinable public mutating func insert<C>(contentsOf newElements: C, at i: Int) where C : Collection, C.Element == UInt {
         for element in newElements {
-            PyList_Insert(self, i, PyLong_FromUnsignedLong(element))
-            let obj = 1
-            
+            PyList_Insert(self, i, PyLong_FromUnsignedLong(element))            
         }
     }
     

@@ -1,6 +1,9 @@
 import Foundation
 import CoreGraphics
 
+public typealias PythonPointer = UnsafeMutablePointer<PyObject>?
+public typealias PythonPointerU = UnsafeMutablePointer<PyObject>
+
 extension PythonPointer: Sequence, IteratorProtocol {
 
     public typealias Element = PythonPointer
@@ -11,7 +14,7 @@ extension PythonPointer: Sequence, IteratorProtocol {
     }
     
     @inlinable
-        public func getBuffer() -> UnsafeBufferPointer<UnsafeMutablePointer<PyObject>?> {
+        public func getBuffer() -> UnsafeBufferPointer<PythonPointer> {
             let fast_list = PySequence_Fast(self, "")
             let list_count = PythonSequence_Fast_GET_SIZE(fast_list)
             let fast_items = PythonSequence_Fast_ITEMS(fast_list)
@@ -62,24 +65,53 @@ extension PythonPointer {
         Py_DecRef(self)
     }
     
-    @inlinable
-    func callAsFunction() {
-        PyObject_Vectorcall(self, [], 0, nil)
+    @inlinable func incref() {
+        Py_IncRef(self)
     }
     
-    @inlinable
-    func callAsFunction(_ args: PythonPointer?...) {
-        PyObject_Vectorcall(self, args, args.count, nil)
-    }
+    
     
     @inlinable
-    func callAsFunction(_ args: [PythonPointer?]) {
-        PyObject_Vectorcall(self, args, args.count, nil)
-    }
-    
-    @inlinable
-    func callAsFunction(_ args: [PythonPointer?], arg_count: Int) {
+    func callAsFunction(_ args: [PythonPointer], arg_count: Int) {
         PyObject_Vectorcall(self, args, arg_count, nil)
+    }
+    
+    @inlinable
+    func callAsFunction(){
+        PyObject_CallNoArgs(self)
+    }
+    
+    @inlinable
+    func callAsFunction(_ arg: PythonPointer){
+        PyObject_CallOneArg(self, arg)
+    }
+    
+    
+    
+    @inlinable
+    func callAsFunction(_ args: PythonPointer...){
+        PyObject_Vectorcall(self, args, args.count, nil)
+    }
+    
+    @inlinable
+    func callAsFunction(_ args: [PythonPointer]){
+        PyObject_Vectorcall(self, args, args.count, nil)
+    }
+    
+    @inlinable
+    func callAsFunction(_ args: [PythonPointer], arg_names: PythonPointer){
+        PyObject_Vectorcall(self, args, args.count, arg_names)
+    }
+    
+    @inlinable
+    func callAsFunction(_ args: PythonPointer..., arg_names: PythonPointer){
+        PyObject_Vectorcall(self, args, args.count, nil)
+    }
+    
+    @inlinable
+    func withCall(_ code: @escaping ()->[PythonPointer] ) -> PythonPointer {
+        let args = code()
+        return PyObject_Vectorcall(self, args, args.count, nil)
     }
 }
 
