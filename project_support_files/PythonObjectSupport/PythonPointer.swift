@@ -44,7 +44,34 @@ extension PythonPointer {
     @inlinable var uint8: UInt8 { UInt8(clamping: PyLong_AsUnsignedLong(self)) }
     @inlinable var double: Double { PyFloat_AsDouble(self) }
     @inlinable var float: Float { Float(PyFloat_AsDouble(self)) }
-    @inlinable var string: String { String.init(cString: PyUnicode_AsUTF8(self)) }
+    @inlinable var bool: Bool { return PyObject_IsTrue(self) == 1}
+    
+    @inlinable var _string: String? {
+        let kind = PythonUnicode_KIND(self)
+        let length = PyUnicode_GetLength(self)
+        let ptr = PythonUnicode_DATA(self)!
+        switch PythonUnicode_Kind(rawValue: kind) {
+        case .PyUnicode_WCHAR_KIND:
+            return "wchars not tested"
+        case .PyUnicode_1BYTE_KIND:
+            let size = length * MemoryLayout<Py_UCS1>.stride
+            let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)
+            return String(data: data, encoding: .utf8)
+        case .PyUnicode_2BYTE_KIND:
+            let size = length * MemoryLayout<Py_UCS2>.stride
+            let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)
+            return String(data: data, encoding: .utf16LittleEndian)
+        case .PyUnicode_4BYTE_KIND:
+            let size = length * MemoryLayout<Py_UCS1>.stride
+            let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)
+            return String(data: data, encoding: .utf32LittleEndian)
+        case .none:
+            print(".none",kind)
+            return nil
+        }
+    }
+    
+    
     
     
     
