@@ -146,3 +146,226 @@ extension String {
     
     
 }
+
+
+public enum PythonUnicode_Kind: UInt32 {
+/* String contains only wstr byte characters.  This is only possible
+   when the string was created with a legacy API and _PyUnicode_Ready()
+   has not been called yet.  */
+    case PyUnicode_WCHAR_KIND = 0
+/* Return values of the PyUnicode_KIND() macro: */
+    case PyUnicode_1BYTE_KIND = 1
+    case PyUnicode_2BYTE_KIND = 2
+    case PyUnicode_4BYTE_KIND = 4
+}
+
+
+func bytesAsDataNoCopy(bytes: PythonPointer) -> Data? {
+    let data_size = PyBytes_Size(bytes)
+    // PyBytes to MemoryView
+    let mview = PyMemoryView_FromObject(bytes)
+    // fetch PyBuffer from MemoryView
+    let py_buf = PythonMemoryView_GET_BUFFER(mview)
+    var indices = [0]
+    // fetch RawPointer from PyBuffer, if fail return nil
+    guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+    let data = Data(bytesNoCopy: buf_ptr, count: data_size, deallocator: .none)
+    // Release PyBuffer and MemoryView
+    Py_DecRef(mview)
+    return data
+}
+
+func bytearrayAsDataNoCopy(bytes: PythonPointer) -> Data? {
+    let data_size = PyByteArray_Size(bytes)
+    // PyBytes to MemoryView
+    let mview = PyMemoryView_FromObject(bytes)
+    // fetch PyBuffer from MemoryView
+    let py_buf = PythonMemoryView_GET_BUFFER(mview)
+    var indices = [0]
+    // fetch RawPointer from PyBuffer, if fail return nil
+    guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+    let data = Data(bytesNoCopy: buf_ptr, count: data_size, deallocator: .none)
+    // Release PyBuffer and MemoryView
+    Py_DecRef(mview)
+    return data
+}
+
+func memoryviewAsDataNoCopy(view: PythonPointer) -> Data? {
+    let data_size = PyObject_Size(view)
+    // fetch PyBuffer from MemoryView
+    let py_buf = PythonMemoryView_GET_BUFFER(view)
+    var indices = [0]
+    // fetch RawPointer from PyBuffer, if fail return nil
+    guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+    return Data(bytesNoCopy: buf_ptr, count: data_size, deallocator: .none)
+}
+
+
+func bytesSlicedAsDataNoCopy(bytes: PythonPointer, start: Int, size: Int) -> Data? {
+    // PyBytes to MemoryView
+    let mview = PyMemoryView_FromObject(bytes)
+    // fetch PyBuffer from MemoryView
+    let py_buf = PythonMemoryView_GET_BUFFER(mview)
+    var indices = [start]
+    // fetch RawPointer from PyBuffer, if fail return nil
+    guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+    let data = Data(bytesNoCopy: buf_ptr, count: size, deallocator: .none)
+    // Release PyBuffer and MemoryView
+    Py_DecRef(mview)
+    return data
+}
+
+func memoryviewSlicedAsDataNoCopy(view: PythonPointer, start: Int, size: Int) -> Data? {
+    // fetch PyBuffer from MemoryView
+    let py_buf = PythonMemoryView_GET_BUFFER(view)
+    var indices = [start]
+    // fetch RawPointer from PyBuffer, if fail return nil
+    guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+    let data = Data(bytesNoCopy: buf_ptr, count: size, deallocator: .none)
+    // Release PyBuffer and MemoryView
+    return data
+}
+
+extension PythonPointer {
+    // PyBytes -> Data
+    func bytesAsData() -> Data? {
+        let data_size = PyBytes_Size(self)
+        // PyBytes to MemoryView
+        let mview = PyMemoryView_FromObject(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(mview)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // cast RawPointer as UInt8 pointer
+        let data = Data(bytes: buf_ptr, count: data_size)
+        // Release MemoryView
+        Py_DecRef(mview)
+        return data
+    }
+    
+    func bytesSlicedAsData(start: Int, size: Int) -> Data? {
+        // PyBytes to MemoryView
+        let mview = PyMemoryView_FromObject(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(mview)
+        var indices = [start]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        let data = Data(bytes: buf_ptr, count: size)
+        // Release MemoryView
+        Py_DecRef(mview)
+        return data
+    }
+    
+    func bytearrayAsData() -> Data? {
+        let data_size = PyByteArray_Size(self)
+        // PyBytes to MemoryView
+        let mview = PyMemoryView_FromObject(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(mview)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // cast RawPointer as UInt8 pointer
+        let data = Data(bytes: buf_ptr, count: data_size)
+        // Release MemoryView
+        Py_DecRef(mview)
+        return data
+    }
+    
+    func memoryViewAsData() -> Data? {
+        let data_size = PyObject_Size(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(self)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // cast RawPointer as UInt8 pointer
+        let uint8_pointer = buf_ptr.assumingMemoryBound(to: UInt8.self)
+        // finally create Data from the UInt8 pointer
+        let data = Data(UnsafeMutableBufferPointer(start: uint8_pointer, count: data_size))
+        // Release PyBuffer and MemoryView
+        PyBuffer_Release(py_buf)
+        return data
+    }
+    
+    func memoryViewSlicedAsData(start: Int, size: Int) -> Data? {
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(self)
+        var indices = [start]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        return Data(bytes: buf_ptr, count: size)
+    }
+    
+    func bytesAsArray() -> [UInt8]? {
+        let data_size = PyBytes_Size(self)
+        // PyBytes to MemoryView
+        let mview = PyMemoryView_FromObject(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(mview)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // finally create Array<UInt8> from the buf_ptr
+        let array = [UInt8](UnsafeBufferPointer(
+            start: buf_ptr.assumingMemoryBound(to: UInt8.self),
+            count: data_size)
+        )
+        // Release PyBuffer and MemoryView
+        Py_DecRef(mview)
+        return array
+    }
+    
+    func bytearrayAsArray() -> [UInt8]? {
+        let data_size = PyByteArray_Size(self)
+        // PyBytes to MemoryView
+        let mview = PyMemoryView_FromObject(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(mview)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // cast RawPointer as UInt8 pointer
+        let array = [UInt8](UnsafeBufferPointer(
+            start: buf_ptr.assumingMemoryBound(to: UInt8.self),
+            count: data_size)
+        )
+        // Release MemoryView
+        Py_DecRef(mview)
+        return array
+    }
+    
+    func memoryViewAsArray() -> [UInt8]? {
+        let data_size = PyObject_Size(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(self)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // finally create Array<UInt8> from the buf_ptr
+        let array = [UInt8](UnsafeBufferPointer(
+            start: buf_ptr.assumingMemoryBound(to: UInt8.self),
+            count: data_size)
+        )
+        return array
+    }
+    
+    
+    
+    
+}
+
+@inlinable func asPyBool(_ state: Bool) -> PythonPointer {
+    if state { return PythonTrue }
+    
+    return PythonFalse
+}
+
+extension Bool {
+    @inlinable var object: PythonPointer {
+        if self { return PythonTrue }
+        return PythonFalse
+    }
+}
