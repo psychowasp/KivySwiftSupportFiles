@@ -34,6 +34,8 @@ func createMemoryView(data: inout Data,_ completion: @escaping (PythonPointer)->
     }
 }
 
+
+
 //AVFoundation Pixels to MemoryView
 @inlinable
 func createMemoryView(pixels: CVPixelBuffer,_ completion: @escaping (PythonPointer)->Void )  {
@@ -112,6 +114,18 @@ extension Data {
         var pybuf = Py_buffer()
         PyBuffer_FillInfo(&pybuf, nil, buffer, size , 0, PyBUF_WRITE)
         return PyMemoryView_FromBuffer(&pybuf)
+    }
+    
+    @inlinable
+    mutating func pythonBytes() -> PythonPointer {
+        let size = self.count //* uint8_size
+        let buffer = self.withUnsafeMutableBytes {$0.baseAddress}
+        var pybuf = Py_buffer()
+        PyBuffer_FillInfo(&pybuf, nil, buffer, size , 0, PyBUF_WRITE)
+        let mem = PyMemoryView_FromBuffer(&pybuf)
+        let bytes = PyBytes_FromObject(mem)
+        Py_DecRef(mem)
+        return bytes
     }
 }
 

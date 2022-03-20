@@ -32,7 +32,6 @@ unsigned int PythonUnicode_KIND(PyObject *o) {return  PyUnicode_KIND(o);}
 Py_UCS1 *PythonUnicode_1BYTE_DATA(PyObject *o) { PyUnicode_1BYTE_DATA(o); }
 Py_UCS2 *PythonUnicode_2BYTE_DATA(PyObject *o) { PyUnicode_2BYTE_DATA(o); }
 Py_UCS4 *PythonUnicode_4BYTE_DATA(PyObject *o) { PyUnicode_4BYTE_DATA(o); }
-
 PyObject* PythonNone = Py_None;
 PyObject* PythonTrue = Py_True;
 PyObject* PythonFalse = Py_False;

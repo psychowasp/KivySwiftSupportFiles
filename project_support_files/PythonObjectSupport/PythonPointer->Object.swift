@@ -31,7 +31,8 @@ extension Int8 {
     var object: PythonPointerU { PyLong_FromLong(Int(self)) }
 }
 extension UInt8 {
-    var object: PythonPointerU { PyLong_FromUnsignedLong(UInt(self)) }
+    var _object: PythonPointerU { PyLong_FromUnsignedLong(UInt(self)) }
+    var object: PythonPointer { PyLong_FromUnsignedLong(UInt(self)) }
 }
 extension Float {
     var object: PythonPointerU { PyFloat_FromDouble(Double(self)) }

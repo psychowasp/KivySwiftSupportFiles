@@ -33,7 +33,7 @@ public struct PythonObject {
     public init(ptr: PythonPointer, keep_alive: Bool = false, from_getter: Bool = false) {
         print("initing PythonObject",ptr, ptr!.pointee.ob_refcnt)
         self.ptr = ptr
-        self.object_autorelease = PythonPointerAutoRelease(pointer: ptr, keep: keep_alive, from_getattr: from_getter)
+        self.object_autorelease = PythonPointerAutoRelease(pointer: ptr, keep: keep_alive)
     }
     
     subscript(dynamicMember member: String) -> PythonPointer {

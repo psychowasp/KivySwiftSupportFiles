@@ -89,7 +89,7 @@ extension PythonPointer {
 
     @inlinable
     public __consuming func array() -> [Int] {
-        let fast_list = PySequence_Fast(self, "")
+        let fast_list = PySequence_Fast(self, nil)
         let list_count = PythonSequence_Fast_GET_SIZE(fast_list)
         let fast_items = PythonSequence_Fast_ITEMS(fast_list)
         let buffer = UnsafeBufferPointer(start: fast_items, count: list_count)
@@ -105,7 +105,7 @@ extension PythonPointer {
 
     @inlinable
     public __consuming func array() -> [UInt] {
-        let fast_list = PySequence_Fast(self, "")
+        let fast_list = PySequence_Fast(self, nil)
         let list_count = PythonSequence_Fast_GET_SIZE(fast_list)
         let fast_items = PythonSequence_Fast_ITEMS(fast_list)
         let buffer = UnsafeBufferPointer(start: fast_items, count: list_count)

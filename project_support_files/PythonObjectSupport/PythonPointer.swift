@@ -369,3 +369,12 @@ extension Bool {
         return PythonFalse
     }
 }
+
+
+extension Data {
+    @inlinable var jsonStr: PythonPointer {
+        return self.withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(1, buf.baseAddress, self.count)
+        }
+    }
+}
