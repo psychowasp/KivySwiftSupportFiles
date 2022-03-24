@@ -3,6 +3,8 @@ import CoreGraphics
 
 public typealias PythonPointer = UnsafeMutablePointer<PyObject>?
 public typealias PythonPointerU = UnsafeMutablePointer<PyObject>
+public typealias PySequenceBuffer = UnsafeBufferPointer<UnsafeMutablePointer<PyObject>?>
+
 
 extension PythonPointer: Sequence, IteratorProtocol {
 
@@ -46,13 +48,13 @@ extension PythonPointer {
     @inlinable var float: Float { Float(PyFloat_AsDouble(self)) }
     @inlinable var bool: Bool { return PyObject_IsTrue(self) == 1}
     
-    @inlinable var _string: String? {
+    @inlinable var string: String? {
+        guard let ptr = PythonUnicode_DATA(self) else { return nil }
         let kind = PythonUnicode_KIND(self)
         let length = PyUnicode_GetLength(self)
-        let ptr = PythonUnicode_DATA(self)!
         switch PythonUnicode_Kind(rawValue: kind) {
         case .PyUnicode_WCHAR_KIND:
-            return "wchars not tested"
+            return nil
         case .PyUnicode_1BYTE_KIND:
             let size = length * MemoryLayout<Py_UCS1>.stride
             let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)
@@ -62,7 +64,7 @@ extension PythonPointer {
             let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)
             return String(data: data, encoding: .utf16LittleEndian)
         case .PyUnicode_4BYTE_KIND:
-            let size = length * MemoryLayout<Py_UCS1>.stride
+            let size = length * MemoryLayout<Py_UCS4>.stride
             let data = Data(bytesNoCopy: ptr, count: size, deallocator: .none)
             return String(data: data, encoding: .utf32LittleEndian)
         case .none:
@@ -71,6 +73,15 @@ extension PythonPointer {
         }
     }
     
+    @inlinable var jsonData: Data? {
+        guard let ptr = PythonUnicode_DATA(self) else { return nil }
+        return Data(bytes: ptr, count: PyUnicode_GetLength(self))
+    }
+    
+    @inlinable var jsonDataNoCopy: Data? {
+        guard let ptr = PythonUnicode_DATA(self) else { return nil }
+        return Data(bytesNoCopy: ptr, count: PyUnicode_GetLength(self), deallocator: .none)
+    }
     
     
     
@@ -376,5 +387,228 @@ extension Data {
         return self.withUnsafeBytes { buf in
             PyUnicode_FromKindAndData(1, buf.baseAddress, self.count)
         }
+    }
+}
+
+
+
+
+extension String {
+    @inlinable var pyStringUTF8: PythonPointer {
+        guard let data = self.data(using: .utf8) else { return nil }
+        return data.withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(1, buf.baseAddress, data.count)
+        }
+    }
+    @inlinable var pyStringUTF16: PythonPointer {
+        guard let data = self.data(using: .utf16LittleEndian) else { return nil }
+        return data.withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(2, buf.baseAddress, data.count)
+        }
+    }
+    @inlinable var pyStringUTF32: PythonPointer {
+        guard let data = self.data(using: .utf32LittleEndian) else { return nil }
+        return data.withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(4, buf.baseAddress, data.count)
+        }
+    }
+}
+
+extension Data {
+    @inlinable var pyStringUTF8: PythonPointer {
+        return withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(1, buf.baseAddress, count)
+        }
+    }
+    @inlinable var pyStringUTF16: PythonPointer {
+        return withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(2, buf.baseAddress, count)
+        }
+    }
+    @inlinable var pyStringUTF32: PythonPointer {
+        return withUnsafeBytes { buf in
+            PyUnicode_FromKindAndData(4, buf.baseAddress, count)
+        }
+    }
+}
+
+extension SignedInteger {
+    var python_int: PythonPointer {PyLong_FromLong(Int(self)) }
+    var pyInt: PythonPointer {PyLong_FromLong(Int(self)) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+}
+
+extension UnsignedInteger {
+    var python_int: PythonPointer { PyLong_FromUnsignedLong(UInt(self)) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+}
+
+extension Int {
+    var python_int: PythonPointer { PyLong_FromLong(self) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+}
+
+extension UInt {
+    var python_int: PythonPointer { PyLong_FromUnsignedLong(self) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+
+}
+
+extension Double {
+    var python_float: PythonPointer { PyFloat_FromDouble(self) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+}
+
+extension Float {
+    var python_float: PythonPointer { PyFloat_FromDouble(Double(self)) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+}
+
+@available(iOS 14, *)
+extension Float16 {
+    var python_float: PythonPointer { PyFloat_FromDouble(Double(self)) }
+    //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
+}
+
+extension CGFloat {
+    var python_float: PythonPointer { PyFloat_FromDouble(self) }
+    //var python_str: PythonPointer { PyUnicode_FromString("\(self)") }
+}
+
+
+extension Array where Element == PythonPointer {
+    
+    
+    
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, element)
+        }
+        return list
+    }
+    
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, element)
+        }
+        return tuple
+    }
+}
+
+extension Array where Element == String {
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyUnicode_FromString(element))
+        }
+        return list
+    }
+    
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyUnicode_FromString(element))
+        }
+        return tuple
+    }
+}
+
+extension Array where Element == Double {
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyFloat_FromDouble(element))
+        }
+        return list
+    }
+    
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyFloat_FromDouble(element))
+        }
+        return tuple
+    }
+}
+
+
+extension Array where Element: SignedInteger  {
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLong(Int(element)))
+        }
+        return list
+    }
+    
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLong(Int(element)))
+        }
+        return tuple
+    }
+}
+
+extension Array where Element: UnsignedInteger {
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return list
+    }
+    
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(UInt(element)))
+        }
+        return tuple
+    }
+}
+
+
+extension Array where Element == Int {
+    
+    init(_ object: PythonPointer) {
+        self.init()
+        
+    }
+    
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromLong(element))
+        }
+        return list
+    }
+
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromLong(element))
+        }
+        return tuple
+    }
+}
+
+extension Array where Element == UInt {
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, PyLong_FromUnsignedLong(element))
+        }
+        return list
+    }
+
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, PyLong_FromUnsignedLong(element))
+        }
+        return tuple
     }
 }

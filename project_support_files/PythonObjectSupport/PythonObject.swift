@@ -7,6 +7,34 @@
 
 import Foundation
 
+
+class PythonPointerAutoRelease {
+    let ptr: PythonPointer
+    private let keep: Bool
+    
+    init(pointer: PythonPointer, keep: Bool = true) {
+        self.ptr = pointer
+        self.keep = keep
+        if keep {
+            Py_IncRef(pointer)
+        }
+    }
+    
+    init(from_getattr pointer: PythonPointer) {
+        ptr = pointer
+        self.keep = true
+    }
+    
+    deinit {
+        if keep {
+            Py_DecRef(ptr)
+            //print("deinit \(ptr!) ref count is now \(ptr!.pointee.ob_refcnt)")
+        }
+    }
+}
+
+
+
 public class PythonObjectSlim {
     public let ptr: PythonPointer
     
@@ -31,7 +59,7 @@ public struct PythonObject {
     private let object_autorelease: PythonPointerAutoRelease
     
     public init(ptr: PythonPointer, keep_alive: Bool = false, from_getter: Bool = false) {
-        print("initing PythonObject",ptr, ptr!.pointee.ob_refcnt)
+        //print("initing PythonObject",ptr as Any, ptr!.pointee.ob_refcnt)
         self.ptr = ptr
         self.object_autorelease = PythonPointerAutoRelease(pointer: ptr, keep: keep_alive)
     }

@@ -8,7 +8,7 @@
 import Foundation
 
 
-public typealias PySequenceBuffer = UnsafeBufferPointer<UnsafeMutablePointer<PyObject>?>
+
 
 
 struct PySequenceIterator: IteratorProtocol {

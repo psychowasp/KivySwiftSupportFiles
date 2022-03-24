@@ -129,7 +129,7 @@ extension Data {
     }
 }
 
-extension Array {
+extension Array where Element == UInt8 {
     @inlinable
     mutating func withMemoryView(_ completion: @escaping (PythonPointer)->Void ) -> Void {
         let size = self.count //* uint8_size

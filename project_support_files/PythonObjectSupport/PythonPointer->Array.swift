@@ -80,7 +80,11 @@ extension PythonPointer {
         var array = [String]()
         array.reserveCapacity(buffer.count)
         for element in buffer {
-            array.append(String(cString: PyUnicode_AsUTF8(element)))
+            guard let str = element.string else {
+                print("Sequence contains none PyUnicode item")
+                return []
+            }
+            array.append(str)
         }
         Py_DecRef(fast_list)
         return array
