@@ -266,7 +266,7 @@ def handle_arg_type(arg, count: int, returns: bool) -> dict:
     options: list[str] = []
     #if isinstance(arg, ast.arg):
     #if isinstance(arg, ast.Name):
-    t = ""
+    t = "void"
     match arg:
         case ast.arg():
             t = handle_arg_arg(arg, options)
@@ -274,6 +274,7 @@ def handle_arg_type(arg, count: int, returns: bool) -> dict:
             t = handle_AnnAssign(arg,options)
         case ast.Subscript():
             print("ast.Subscript")
+            t = handleSubscript(arg, options)
         case ast.Slice():
             print("ast.Slice")
         case ast.Name():
@@ -346,6 +347,7 @@ def handle_arg_type(arg, count: int, returns: bool) -> dict:
         options.append("data")
     
     if returns:
+        print("return",t)
         return {
         "name": t,
         "type": t,
@@ -379,7 +381,7 @@ class PyWrapClass:
     def __init__(self, pyi_mode: bool = False):
         self.properties = []
         self.pyi_mode = pyi_mode
-        self.singleton = False
+        self.singleton = True
         self.functions = []
     
 
