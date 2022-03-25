@@ -282,5 +282,18 @@ extension PythonPointer {
         return array
     }
 
-
+    @inlinable
+    public __consuming func array() -> [Bool] {
+        let fast_list = PySequence_Fast(self, "")
+        let list_count = PythonSequence_Fast_GET_SIZE(fast_list)
+        let fast_items = PythonSequence_Fast_ITEMS(fast_list)
+        let buffer = UnsafeBufferPointer(start: fast_items, count: list_count)
+        var array = [Bool]()
+        array.reserveCapacity(buffer.count)
+        for element in buffer {
+            array.append(PyObject_IsTrue(element) == 1)
+        }
+        Py_DecRef(fast_list)
+        return array
+    }
 }

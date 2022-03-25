@@ -612,3 +612,21 @@ extension Array where Element == UInt {
         return tuple
     }
 }
+
+extension Array where Element == Bool {
+    public var pythonList: PythonPointer {
+        let list = PyList_New(0)
+        for element in self {
+            PyList_Append(list, element.object)
+        }
+        return list
+    }
+
+    var pythonTuple: PythonPointer {
+        let tuple = PyTuple_New(self.count)
+        for (i, element) in self.enumerated() {
+            PyTuple_SetItem(tuple, i, element.object)
+        }
+        return tuple
+    }
+}
