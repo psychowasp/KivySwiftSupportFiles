@@ -106,7 +106,7 @@ extension PythonPointer {
     func append(_ value: UInt) { PyList_Append(self, value.python_int) }
     func append<T: SignedInteger>(_ value: T) { PyList_Append(self, value.python_int) }
     func append<T: UnsignedInteger>(_ value: T) { PyList_Append(self, value.python_int) }
-    func append(_ value: String) { PyList_Append(self, value.python_str) }
+    //func append(_ value: String) { PyList_Append(self, value.python_str) }
     func append(_ value: Double) { PyList_Append(self, value.python_float) }
     func append(_ value: Float) { PyList_Append(self, value.python_float) }
     @available(iOS 14, *)
@@ -147,7 +147,7 @@ extension PythonPointer {
         for value in contentsOf { PyList_Append(self, value.python_int) }
     }
     func append(contentsOf: [String]) {
-        for value in contentsOf { PyList_Append(self, value.python_str) }
+        //for value in contentsOf { PyList_Append(self, value.python_str) }
     }
     func append(contentsOf: [PythonPointer]) {
         for value in contentsOf { PyList_Append(self, value) }

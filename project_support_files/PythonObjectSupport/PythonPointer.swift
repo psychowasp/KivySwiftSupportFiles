@@ -255,6 +255,22 @@ extension PythonPointer {
         return data
     }
     
+    func strAsData() -> Data? {
+        let data_size = PyBytes_Size(self)
+        // PyBytes to MemoryView
+        let mview = PyMemoryView_FromObject(self)
+        // fetch PyBuffer from MemoryView
+        let py_buf = PythonMemoryView_GET_BUFFER(mview)
+        var indices = [0]
+        // fetch RawPointer from PyBuffer, if fail return nil
+        guard let buf_ptr = PyBuffer_GetPointer(py_buf, &indices) else { return nil}
+        // cast RawPointer as UInt8 pointer
+        let data = Data(bytes: buf_ptr, count: data_size)
+        // Release MemoryView
+        Py_DecRef(mview)
+        return data
+    }
+    
     func bytesSlicedAsData(start: Int, size: Int) -> Data? {
         // PyBytes to MemoryView
         let mview = PyMemoryView_FromObject(self)
