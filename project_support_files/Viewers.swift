@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import WebKit
 import PDFKit
-
+import MobileCoreServices
 
 
 class WebViewer: UIViewController,WKNavigationDelegate {
@@ -81,34 +81,44 @@ class KivyUIView: UIView {
 }
 
 
-class DocumentPicker: UIViewController {
-    let pick = UIDocumentPickerViewController(documentTypes: [], in: .open)
-    //var callback: AppleApiCallback?
+
+class DocumentPicker: NSObject, UIDocumentPickerDelegate {
     
-    override func viewWillAppear(_ animated: Bool) {
-        self.view.addSubview(pick.view)
-//        if let call = self.callback {
-//            if let data = self.view.pixelData() {
-//                print(data.size)
-//                call.preview_pixel_data(data.bytes, data.size, Int(self.view.bounds.width), Int(self.view.bounds.height))
-//            }
-//            
-//        }
-    }
-    override func viewDidLoad() {
+    let did_pick: ((_ urls: [URL])->Void)?
+    let did_cancel: (()->Void)?
+    
+    let kivy_vc: UIViewController
+    
+    let picker: UIDocumentPickerViewController
+    
+    init(types: [CFString], mode: UIDocumentPickerMode, did_pick: @escaping (_ urls: [URL])->Void, did_cancel: @escaping ()->Void) {
+        self.did_pick = did_pick
+        self.did_cancel = did_cancel
+        guard let vc = get_viewcontroller() else {fatalError("No Kivy ViewController found")} //will just return if it cant get kivy viewcontroller
+        self.kivy_vc = vc
+        let types = types.map{String($0)}
+        picker = UIDocumentPickerViewController(documentTypes: types, in: mode )
+        super.init()
+        picker.delegate = self
         
-//        if let call = self.callback {
-//            if let data = self.view.pixelData() {
-//                print(data.size)
-//                call.preview_pixel_data(data.bytes, data.size, Int(self.view.bounds.width), Int(self.view.bounds.height))
-//            }
-//
-//        }
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
         
     }
     
+    func present(animated: Bool) {
+        kivy_vc.present(picker, animated: animated)
+    }
     
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let did_pick = did_pick else {
+            return
+        }
+        did_pick(urls)
+    }
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        guard let did_cancel = did_cancel else {
+            return
+        }
+        did_cancel()
+    }
 }
