@@ -1,6 +1,15 @@
 extension PythonPointer {
-
-
+    
+    @inlinable
+    func set(key: String, value: PythonPointer) {
+        PyObject_SetAttrString(self, key, value)
+    }
+    
+    @inlinable
+    func set(key: PythonPointer, value: PythonPointer) {
+        PyObject_SetAttr(self, key, value)
+    }
+    
     @inlinable
     func set(key: String, value: String) {
         PyObject_SetAttrString(self, key, PyUnicode_FromString(value))

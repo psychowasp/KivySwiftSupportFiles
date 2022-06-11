@@ -107,7 +107,70 @@ extension PythonPointer {
         Py_IncRef(self)
     }
     
+//    @inlinable
+//    func callAsFunction(method name: PythonPointer) -> Void {
+//        PyObject_CallMethodNoArgs(self, name)
+//    }
     
+    @discardableResult
+    @inlinable
+    func callAsFunction(method name: PythonPointer) -> PythonPointer {
+        PyObject_CallMethodNoArgs(self, name)
+    }
+    
+    @inlinable
+    func callAsFunction(method name: String) {
+        let name = name.pyStringUTF8
+        PyObject_CallMethodNoArgs(self, name)
+        Py_DecRef(name)
+    }
+    
+    @inlinable
+    func callAsFunction(method name: String) -> PythonPointer {
+        let name = name.pyStringUTF8
+        let rtn = PyObject_CallMethodNoArgs(self, name)
+        Py_DecRef(name)
+        return rtn
+    }
+    
+//    @inlinable
+//    func callAsFunction(method name: PythonPointer ,args: [PythonPointer]) -> Void {
+//        //PyObject_Vectorcall(self, args, arg_count, nil)
+//        var _args = [self]
+//        _args.append(contentsOf: args)
+//        PyObject_VectorcallMethod(name, _args , _args.count, nil)
+//    }
+    
+    @inlinable
+    func callAsFunction(method name: String ,args: [PythonPointer]) {
+        //PyObject_Vectorcall(self, args, arg_count, nil)
+        var _args = [self]
+        let py_name = name.pyStringUTF8
+        _args.append(contentsOf: args)
+        PyObject_VectorcallMethod(py_name, _args , _args.count, nil)
+        py_name.decref()
+        
+    }
+    
+    @discardableResult
+    @inlinable
+    func callAsFunction(method name: PythonPointer ,args: [PythonPointer]) -> PythonPointer {
+        //PyObject_Vectorcall(self, args, arg_count, nil)
+        var _args = [self]
+        _args.append(contentsOf: args)
+        return PyObject_VectorcallMethod(name, _args , _args.count, nil)
+    }
+    
+    @inlinable
+    func callAsFunction(method name: String ,args: [PythonPointer]) -> PythonPointer {
+        //PyObject_Vectorcall(self, args, arg_count, nil)
+        var _args = [self]
+        let py_name = name.pyStringUTF8
+        _args.append(contentsOf: args)
+        let rtn = PyObject_VectorcallMethod(py_name, _args , _args.count, nil)
+        py_name.decref()
+        return rtn
+    }
     
     @inlinable
     func callAsFunction(_ args: [PythonPointer], arg_count: Int) {
@@ -460,12 +523,13 @@ extension UnsignedInteger {
 }
 
 extension Int {
-    var python_int: PythonPointer { PyLong_FromLong(self) }
+    @inlinable
+    public var python_int: PythonPointer { PyLong_FromLong(self) }
     //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
 }
 
 extension UInt {
-    var python_int: PythonPointer { PyLong_FromUnsignedLong(self) }
+    public var python_int: PythonPointer { PyLong_FromUnsignedLong(self) }
     //var python_str: PythonPointer { PyUnicode_FromString(String(self)) }
 
 }
